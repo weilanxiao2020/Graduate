@@ -5,6 +5,7 @@ import com.miyako.dao.OrderDao;
 import com.miyako.model.GPS;
 import com.miyako.model.Order;
 import com.miyako.utils.LogUtil;
+import com.miyako.utils.MapUtil;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -55,6 +56,7 @@ public class MqttMsg {
                 gps.setTimestamp(Long.valueOf(utc));
                 gps.setLatitude(latitude+n_s);
                 gps.setLongitude(longitude+e_w);
+                gps.setRegion(MapUtil.gpsParse(Double.valueOf(latitude), Double.valueOf(longitude)));
                 //if (GPSDao.insert(gps) != -1) {
                 //    LogUtil.d(TAG, "mqtt消息处理成功");
                 //} else {
@@ -88,8 +90,14 @@ public class MqttMsg {
                 index +=(data[i-1]&0xff);
                 String status = parseData(data, index, data[i++]&0xff);
                 Order order = OrderDao.findByTrackId(trackId);
-                order.setTimestamp(Long.valueOf(timestamp));
-                order.setStatus(status);
+                if (order == null) {
+                    LogUtil.d(TAG, "查询为空");
+                    return;
+                } else {
+                    order.setTimestamp(Long.valueOf(timestamp));
+                    order.setStatus(status);
+                }
+
                 //if (OrderDao.update(order) != -1) {
                 //    LogUtil.d(TAG, "mqtt消息处理成功");
                 //} else {

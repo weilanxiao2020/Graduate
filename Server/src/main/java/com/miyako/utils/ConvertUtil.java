@@ -22,7 +22,7 @@ public class ConvertUtil{
 
     // gpsmsg为utc时间
     public static void gpsToGpsMsg(GPS gps, GpsMsg gpsMsg){
-        LogUtil.d(TAG, "GPS -> GpsMsg");
+        //LogUtil.d(TAG, "GPS -> GpsMsg");
         if (gps == null) {
             gpsMsg.setId(0);
             gpsMsg.setUtcTime("0");
@@ -45,7 +45,7 @@ public class ConvertUtil{
 
     // gpsmsg为utc时间
     public static void gpsMsgToGps(GpsMsg gpsMsg, GPS gps){
-        LogUtil.d(TAG, "GpsMsg -> GPS");
+        //LogUtil.d(TAG, "GpsMsg -> GPS");
         gps.setMissionId(gpsMsg.getMissionId());
         gps.setTimestamp(Long.valueOf(gpsMsg.getUtcTime()));
         gps.setLatitude(gpsMsg.getLatitude()+gpsMsg.getN_S());
@@ -58,7 +58,7 @@ public class ConvertUtil{
     }
 
     public static void missionToMissionMsg(Mission mission, MissionMsg missionMsg){
-        LogUtil.d(TAG, "Mission -> MissionMsg");
+        //LogUtil.d(TAG, "Mission -> MissionMsg");
         missionMsg.setMissionId(missionId2LicenseCode(mission.getLicense(), mission.getCode()));
         missionMsg.setTimestamp(mission.getTimestamp());
         missionMsg.setAddress(mission.getAddress());
@@ -66,7 +66,7 @@ public class ConvertUtil{
     }
 
     public static void orderToOrderMsg(Order order, OrderMsg orderMsg){
-        LogUtil.d(TAG, "Order -> OrderMsg");
+        //LogUtil.d(TAG, "Order -> OrderMsg");
         orderMsg.setTrackId(order.getTrackId());
         orderMsg.setTimestamp(order.getTimestamp());
         orderMsg.setSender(order.getSender());

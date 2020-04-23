@@ -3,10 +3,9 @@ package com.miyako.dao;
 import com.miyako.model.GPS;
 import com.miyako.mysql.MySqlHelper;
 import com.miyako.utils.LogUtil;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * ClassName MissionDao
@@ -25,8 +24,8 @@ public class GPSDao {
 
     public static List<GPS> findAll() {
         LogUtil.d(TAG, "findAll");
-        ResultSet resultSet = MySqlHelper.getInstance().executeQuery(SQL_SELECT_ALL, null);
-        List<GPS> GPSs = create(resultSet);
+        List<Map<String, String>> mapList = MySqlHelper.getInstance().executeQuery(SQL_SELECT_ALL, null);
+        List<GPS> GPSs = create(mapList);
         return GPSs;
     }
 
@@ -36,8 +35,8 @@ public class GPSDao {
                     +"FROM tb_gps WHERE tb_gps.`id` = ?;";
     public static GPS findById(int id) {
         LogUtil.d(TAG, "findById: "+id);
-        ResultSet resultSet = MySqlHelper.getInstance().executeQuery(SQL_SELECT_ID, new String[]{String.valueOf(id)});
-        List<GPS> GPSs = create(resultSet);
+        List<Map<String, String>> mapList = MySqlHelper.getInstance().executeQuery(SQL_SELECT_ID, new String[]{String.valueOf(id)});
+        List<GPS> GPSs = create(mapList);
         return GPSs.size()==0?null:GPSs.get(0);
     }
 
@@ -46,8 +45,8 @@ public class GPSDao {
                     +"FROM tb_gps WHERE tb_gps.`trackId` = ?;";
     public static GPS findByTrackId(int track) {
         LogUtil.d(TAG, "findByTrackId: "+track);
-        ResultSet resultSet = MySqlHelper.getInstance().executeQuery(SQL_SELECT_TRACK, new String[]{String.valueOf(track)});
-        List<GPS> missions = create(resultSet);
+        List<Map<String, String>> mapList = MySqlHelper.getInstance().executeQuery(SQL_SELECT_TRACK, new String[]{String.valueOf(track)});
+        List<GPS> missions = create(mapList);
         return missions.size()==0?null:missions.get(0);
     }
 
@@ -57,8 +56,8 @@ public class GPSDao {
                     +"FROM tb_gps WHERE tb_gps.`missionId` = ?;";
     public static List<GPS> findByMissionId(String mission) {
         LogUtil.d(TAG, "findByMissionId: "+mission);
-        ResultSet resultSet = MySqlHelper.getInstance().executeQuery(SQL_SELECT_MISSION, new String[]{mission});
-        List<GPS> missions = create(resultSet);
+        List<Map<String, String>> mapList = MySqlHelper.getInstance().executeQuery(SQL_SELECT_MISSION, new String[]{mission});
+        List<GPS> missions = create(mapList);
         return missions;
     }
 
@@ -101,22 +100,17 @@ public class GPSDao {
         return MySqlHelper.getInstance().executeUpdate(SQL_UPDATE, array);
     }
 
-    private static List<GPS> create(ResultSet resultSet) {
-        List<GPS> datas = null;
-        try{
-            datas = new ArrayList<>(resultSet.getFetchSize());
-            while (resultSet.next()) {
-                GPS gps = new GPS();
-                gps.setId(resultSet.getInt("id"));
-                gps.setTimestamp(resultSet.getLong("timestamp"));
-                gps.setLatitude(resultSet.getString("latitude"));
-                gps.setLongitude(resultSet.getString("longitude"));
-                gps.setRegion(resultSet.getString("region"));
-                gps.setMissionId(resultSet.getString("missionId"));
-                datas.add(gps);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+    private static List<GPS> create(List<Map<String, String>> mapList) {
+        List<GPS> datas = new ArrayList<>(mapList.size());
+        for(Map<String, String> map : mapList) {
+            GPS gps = new GPS();
+            gps.setId(Integer.valueOf(map.get("id")));
+            gps.setTimestamp(Long.valueOf(map.get("timestamp")));
+            gps.setLatitude(map.get("latitude"));
+            gps.setLongitude(map.get("longitude"));
+            gps.setRegion(map.get("region"));
+            gps.setMissionId(map.get("missionId"));
+            datas.add(gps);
         }
         return datas;
     }

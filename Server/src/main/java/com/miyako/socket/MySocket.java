@@ -161,7 +161,7 @@ public class MySocket{
                 JsonObject object = element.getAsJsonObject();  // 转化为对象
                 // 1. value为string时，取出string
                 int code = object.get("code").getAsInt();
-                LogUtil.d(TAG, "code:"+code);
+                LogUtil.d(TAG, "request code:"+code);
                 // reqBody.getCode:0xf1 01
                 // head = {0x0e,0x0e,模块号,命令号}
                 head[2] = (byte) (code >> 8 & 0xff);
@@ -214,27 +214,24 @@ public class MySocket{
                     int headLen = 0;
                     byte[] buf = new byte[1024];
                     while ((headLen = input.read(buf)) != -1) {
-                        if (1==1) {
-                            //byte[] mission = "12345678-416421".getBytes();
-                            //byte[] data = new byte[3+mission.length];
-                            //data[0] = (byte) 0xfe;
-                            //data[1] = 0x01;
-                            //data[2] = (byte) mission.length;
-                            //System.arraycopy(mission, 0, data, 3, mission.length);
-                            //output.write(data);
-                            LogUtil.d(TAG, "read:"+new String(buf));
-                            output.write("hello stm32".getBytes());
-                            output.flush();
-                            continue;
-                        }
+                        //if (1==1) {
+                        //    //byte[] mission = "12345678-416421".getBytes();
+                        //    //byte[] data = new byte[3+mission.length];
+                        //    //data[0] = (byte) 0xfe;
+                        //    //data[1] = 0x01;
+                        //    //data[2] = (byte) mission.length;
+                        //    //System.arraycopy(mission, 0, data, 3, mission.length);
+                        //    //output.write(data);
+                        //    LogUtil.d(TAG, "read:"+new String(buf));
+                        //    output.write("hello stm32".getBytes());
+                        //    output.flush();
+                        //    continue;
+                        //}
                         byte[] header = new byte[] {0x0e, 0x0e, 0x0f, 0x0f};
                         LogUtil.d(TAG, "read length:"+headLen);
                         String json = handleJson(client.getInetAddress().getHostAddress(),
                                                  new String(buf, StandardCharsets.UTF_8).trim(), header);
                         LogUtil.i(TAG, ">>> " + client.getInetAddress().getHostAddress() + ":" + json);
-                        //                        writer.write(json);
-                        //                        writer.newLine();
-                        //                        writer.flush();
                         byte[] body = json.getBytes(StandardCharsets.UTF_8);
                         byte[] len = new byte[] {0x00, 0x00, 0x00, 0x00};
                         len[0] = (byte) ((body.length & 0xff000000) >> 24);

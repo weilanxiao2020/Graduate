@@ -70,16 +70,16 @@ public class GpsTask extends BaseTask{
             return new ResBody<>(ServerApp.CMD_GPS_READ, System.currentTimeMillis(),
                                  ServerApp.RESPONSE_ERROR + getAddress());
         }
-        List<GpsMsg> msgs = new ArrayList<>(gpsList.size());
+        List<GpsMsg> msgList = new ArrayList<>(gpsList.size());
         for (GPS gps : gpsList) {
             GpsMsg msg = new GpsMsg();
             ConvertUtil.gpsToGpsMsg(gps, msg);
-            msgs.add(msg);
+            msgList.add(msg);
         }
         ResBody<GpsMsg> resBody = new ResBody<>(ServerApp.CMD_GPS_READ, System.currentTimeMillis(),
                                                 ServerApp.RESPONSE_SUCCESS + getAddress());
 
-        resBody.setData(msgs);
+        resBody.setData(msgList);
         return resBody;
     }
 

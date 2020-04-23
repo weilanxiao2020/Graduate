@@ -11,7 +11,7 @@ import com.miyako.utils.ServerApp;
 import com.miyako.utils.VerifyUtil;
 
 import java.io.IOException;
-//import java.util.List;
+import java.util.List;
 
 public class Main {
 
@@ -32,13 +32,13 @@ public class Main {
         catch (IOException e) {
             e.printStackTrace();
         }
-        //MySqlHelper.getInstance()
-        //           .init(ServerApp.MYSQL_JDBC, ServerApp.MYSQL_URL,
-        //                 ServerApp.MYSQL_USERNAME, ServerApp.MYSQL_PASSWORD, true);
+        MySqlHelper.getInstance()
+                   .init(ServerApp.MYSQL_JDBC, ServerApp.MYSQL_URL,
+                         ServerApp.MYSQL_USERNAME, ServerApp.MYSQL_PASSWORD, true);
         new MySocket(12345).start(); // 监听指定端口
-        //new MqttTask().start();
+        new MqttTask().start();
         LogUtil.d(TAG, "server is running...");
-        LogUtil.d(TAG, "findByAllMission");
+        //LogUtil.d(TAG, "findByAllMission");
         //List<Mission> list = MissionDao.findAll();
         //list.forEach(s -> LogUtil.d(TAG, s.toString()));
     }

@@ -20,7 +20,7 @@ public class MqttTask {
                    .setBroker("ssl")
                    .connect();
         setSubscribe();
-        MqttManager.getInstance().publish(ServerApp.MQTT_TOPIC_CARD_MISSION_SET, buildMissionMsg());
+        //MqttManager.getInstance().publish(ServerApp.MQTT_TOPIC_CARD_MISSION_SET, buildMissionMsg());
     }
 
     private byte[] buildMissionMsg() {
@@ -36,7 +36,21 @@ public class MqttTask {
     private void setSubscribe() {
         MqttManager.getInstance()
                    .subscribe(ServerApp.MQTT_TOPIC_SCAN_RFID_GET, this::getScanCard)
-                   .subscribe(ServerApp.MQTT_TOPIC_CARD_GPS_GET, this::getCardGps);
+                   .subscribe(ServerApp.MQTT_TOPIC_CARD_GPS_GET, this::getCardGps)
+                   .subscribe(ServerApp.MQTT_TOPIC_CARD_INFO_GET_TEST, this::getCardInfoTest);
+    }
+
+    private void getCardInfoTest(byte[] data){
+        LogUtil.d(TAG, "getCardInfoTest byte size=>"+data.length);
+        StringBuilder sb = new StringBuilder();
+        for (byte datum : data) {
+            //sb.append(String.format("%02x",data[i]));
+            //if (i%4==0 && i!=0) {
+            //    LogUtil.d(TAG, "0x"+sb.toString());
+            //    sb = new StringBuilder();
+            //}
+            LogUtil.d(TAG, String.format("%02x", datum));
+        }
     }
 
     /**
@@ -50,7 +64,7 @@ public class MqttTask {
 
     /**
      * 处理车辆Gps实时数据写入数据库
-     * @param data
+     * @param data 透传的数据
      */
     private void getCardGps(byte[] data) {
         LogUtil.d(TAG, "getCardGps byte size=>"+data.length);

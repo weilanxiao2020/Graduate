@@ -87,15 +87,15 @@ public class OrderTask extends BaseTask{
             return new ResBody<>(ServerApp.CMD_ORDER_READ_BY_MISSION, System.currentTimeMillis(),
                                  ServerApp.RESPONSE_ERROR + getAddress());
         }
-        List<OrderMsg> msgs = new ArrayList<>(orders.size());
+        List<OrderMsg> msgList = new ArrayList<>(orders.size());
         for (Order order : orders) {
             OrderMsg msg = new OrderMsg();
             ConvertUtil.orderToOrderMsg(order, msg);
-            msgs.add(msg);
+            msgList.add(msg);
         }
         ResBody<OrderMsg> resBody = new ResBody<>(ServerApp.CMD_ORDER_READ_BY_MISSION, System.currentTimeMillis(),
                                                     ServerApp.RESPONSE_SUCCESS + getAddress());
-        resBody.setData(msgs);
+        resBody.setData(msgList);
         return resBody;
     }
 

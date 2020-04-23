@@ -3,10 +3,9 @@ package com.miyako.dao;
 import com.miyako.mysql.MySqlHelper;
 import com.miyako.model.Order;
 import com.miyako.utils.LogUtil;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * ClassName MissionDao
@@ -25,9 +24,8 @@ public class OrderDao {
 
     public static List<Order> findAll() {
         LogUtil.d(TAG, "findAll");
-        ResultSet resultSet = MySqlHelper.getInstance().executeQuery(SQL_SELECT_ALL, null);
-        List<Order> orders = create(resultSet);
-        return orders;
+        List<Map<String, String>> mapList = MySqlHelper.getInstance().executeQuery(SQL_SELECT_ALL, null);
+        return create(mapList);
     }
 
     private static final String SQL_SELECT_ID =
@@ -36,9 +34,9 @@ public class OrderDao {
                     +"FROM tb_order WHERE tb_order.`id` = ?;";
     public static Order findById(int id) {
         LogUtil.d(TAG, "findById: "+id);
-        ResultSet resultSet = MySqlHelper.getInstance().executeQuery(SQL_SELECT_ID, new String[]{String.valueOf(id)});
-        List<Order> orders = create(resultSet);
-        return orders.size()==0?null:orders.get(0);
+        List<Map<String, String>> mapList = MySqlHelper.getInstance().executeQuery(SQL_SELECT_ID, new String[]{String.valueOf(id)});
+        List<Order> orders = create(mapList);
+        return orders.size() ==0 ? null : orders.get(0);
     }
 
     private static final String SQL_SELECT_TRACK =
@@ -47,8 +45,8 @@ public class OrderDao {
                     +"FROM tb_order WHERE tb_order.`trackId` = ?;";
     public static Order findByTrackId(String track) {
         LogUtil.d(TAG, "findByTrackId: "+track);
-        ResultSet resultSet = MySqlHelper.getInstance().executeQuery(SQL_SELECT_TRACK, new String[]{String.valueOf(track)});
-        List<Order> orders = create(resultSet);
+        List<Map<String, String>> mapList = MySqlHelper.getInstance().executeQuery(SQL_SELECT_TRACK, new String[]{String.valueOf(track)});
+        List<Order> orders = create(mapList);
         return orders.size()==0?null:orders.get(0);
     }
 
@@ -58,8 +56,8 @@ public class OrderDao {
             +"FROM tb_order WHERE tb_order.`missionId` = ?;";
     public static List<Order> findByMissionId(String mission) {
         LogUtil.d(TAG, "findByMissionId: "+mission);
-        ResultSet resultSet = MySqlHelper.getInstance().executeQuery(SQL_SELECT_MISSION, new String[]{String.valueOf(mission)});
-        List<Order> orders = create(resultSet);
+        List<Map<String, String>> mapList = MySqlHelper.getInstance().executeQuery(SQL_SELECT_MISSION, new String[]{String.valueOf(mission)});
+        List<Order> orders = create(mapList);
         return orders;
     }
 
@@ -104,24 +102,19 @@ public class OrderDao {
         return MySqlHelper.getInstance().executeUpdate(SQL_UPDATE, array);
     }
 
-    private static List<Order> create(ResultSet resultSet) {
-        List<Order> datas = null;
-        try{
-            datas = new ArrayList<>(resultSet.getFetchSize());
-            while (resultSet.next()) {
-                Order order = new Order();
-                order.setId(resultSet.getInt("id"));
-                order.setTimestamp(resultSet.getLong("timestamp"));
-                order.setTrackId(resultSet.getString("trackId"));
-                order.setSender(resultSet.getString("sender"));
-                order.setReceiver(resultSet.getString("receiver"));
-                order.setAddress(resultSet.getString("address"));
-                order.setStatus(resultSet.getString("status"));
-                order.setMissionId(resultSet.getString("missionId"));
-                datas.add(order);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+    private static List<Order> create(List<Map<String, String>> mapList) {
+        List<Order> datas = new ArrayList<>(mapList.size());
+        for (Map<String, String> map : mapList) {
+            Order order = new Order();
+            order.setId(Integer.valueOf(map.get("id")));
+            order.setTimestamp(Long.valueOf(map.get("timestamp")));
+            order.setTrackId(map.get("trackId"));
+            order.setSender(map.get("sender"));
+            order.setReceiver(map.get("receiver"));
+            order.setAddress(map.get("address"));
+            order.setStatus(map.get("status"));
+            order.setMissionId(map.get("missionId"));
+            datas.add(order);
         }
         return datas;
     }

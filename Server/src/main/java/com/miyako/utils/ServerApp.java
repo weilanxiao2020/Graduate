@@ -25,6 +25,7 @@ public class ServerApp{
     public static String MQTT_PRODUCTKEY;
     public static String MQTT_DEVICENAME;
     public static String MQTT_DEVICESECRET;
+    public static String MQTT_TOPIC_CARD_INFO_GET_TEST;
     public static String MQTT_TOPIC_SCAN_RFID_GET;
     public static String MQTT_TOPIC_CARD_GPS_GET;
     public static String MQTT_TOPIC_CARD_MISSION_SET;
@@ -44,6 +45,8 @@ public class ServerApp{
         MQTT_TOPIC_SCAN_RFID_GET = properties.getProperty("mqtt_tpoic_scan_rfid_get");
         MQTT_TOPIC_CARD_GPS_GET = properties.getProperty("mqtt_topic_card_gps_get");
         MQTT_TOPIC_CARD_MISSION_SET = properties.getProperty("mqtt_topic_card_mission_set");
+        MQTT_TOPIC_CARD_INFO_GET_TEST = properties.getProperty("mqtt_tpoic_card_info_get_test");
+
     }
 
     public static final int ERROR_CODE = 0x00;

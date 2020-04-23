@@ -3,10 +3,9 @@ package com.miyako.dao;
 import com.miyako.model.Mission;
 import com.miyako.mysql.MySqlHelper;
 import com.miyako.utils.LogUtil;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * ClassName MissionDao
@@ -24,8 +23,8 @@ public class MissionDao {
 
     public static List<Mission> findAll() {
         LogUtil.d(TAG, "findAll");
-        ResultSet resultSet = MySqlHelper.getInstance().executeQuery(SQL_SELECT_ALL, null);
-        List<Mission> missions = create(resultSet);
+        List<Map<String, String>> mapList = MySqlHelper.getInstance().executeQuery(SQL_SELECT_ALL, null);
+        List<Mission> missions = create(mapList);
         return missions;
     }
 
@@ -34,8 +33,8 @@ public class MissionDao {
                     +"FROM tb_mission WHERE tb_mission.`id` = ?;";
     public static Mission findById(int id) {
         LogUtil.d(TAG, "findById: "+id);
-        ResultSet resultSet = MySqlHelper.getInstance().executeQuery(SQL_SELECT_ID, new String[]{String.valueOf(id)});
-        List<Mission> missions = create(resultSet);
+        List<Map<String, String>> mapList = MySqlHelper.getInstance().executeQuery(SQL_SELECT_ID, new String[]{String.valueOf(id)});
+        List<Mission> missions = create(mapList);
         return missions.size()==0?null:missions.get(0);
     }
 
@@ -45,8 +44,8 @@ public class MissionDao {
     public static Mission findByCard(String card) {
         LogUtil.d(TAG, "findByCard: "+card);
         String[] split = card.split("-");
-        ResultSet resultSet = MySqlHelper.getInstance().executeQuery(SQL_SELECT_CARD, (split.length<2?(new String[]{"",""}) : split));
-        List<Mission> missions = create(resultSet);
+        List<Map<String, String>> mapList = MySqlHelper.getInstance().executeQuery(SQL_SELECT_CARD, (split.length<2?(new String[]{"",""}) : split));
+        List<Mission> missions = create(mapList);
         return missions.size()==0?null:missions.get(0);
     }
 
@@ -89,22 +88,17 @@ public class MissionDao {
         return MySqlHelper.getInstance().executeUpdate(SQL_UPDATE, array);
     }
 
-    private static List<Mission> create(ResultSet resultSet) {
-        List<Mission> datas = null;
-        try{
-            datas = new ArrayList<>(resultSet.getFetchSize());
-            while (resultSet.next()) {
-                Mission mission = new Mission();
-                mission.setId(resultSet.getInt("id"));
-                mission.setTimestamp(resultSet.getLong("timestamp"));
-                mission.setLicense(resultSet.getString("license"));
-                mission.setCode(resultSet.getString("code"));
-                mission.setAddress(resultSet.getString("address"));
-                mission.setStatus(resultSet.getString("status"));
-                datas.add(mission);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+    private static List<Mission> create(List<Map<String, String>> mapList) {
+        List<Mission> datas = new ArrayList<>(mapList.size());
+        for (Map<String, String> map : mapList) {
+            Mission mission = new Mission();
+            mission.setId(Integer.valueOf(map.get("id")));
+            mission.setTimestamp(Long.valueOf(map.get("timestamp")));
+            mission.setLicense(map.get("license"));
+            mission.setCode(map.get("code"));
+            mission.setAddress(map.get("address"));
+            mission.setStatus(map.get("status"));
+            datas.add(mission);
         }
         return datas;
     }

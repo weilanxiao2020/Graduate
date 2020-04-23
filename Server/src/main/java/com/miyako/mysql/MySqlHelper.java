@@ -8,9 +8,7 @@ import javax.sql.DataSource;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * ClassName MySqlHelper
@@ -36,9 +34,9 @@ public class MySqlHelper {
     private boolean isPool;
 
     private DataSource dataSource;
-    private Connection connection;
-    private PreparedStatement preparedStatement;
-    private ResultSet resultSet;
+    //private Connection connection;
+    //private PreparedStatement preparedStatement;
+    //private ResultSet resultSet;
 
     public static MySqlHelper getInstance() {
         synchronized (MySqlHelper.class) {
@@ -87,12 +85,12 @@ public class MySqlHelper {
 
     private Connection getConnection() {
         try {
-            connection = dataSource.getConnection();//获取连接
+           return dataSource.getConnection();//获取连接
         }
         catch (SQLException e) {
             e.printStackTrace();
         }
-        return connection;
+        return null;
     }
 
     //update/delete/insert
@@ -100,9 +98,16 @@ public class MySqlHelper {
     public int executeUpdate(String sql, String[] parameters) {
         LogUtil.d(TAG, "数据库修改操作...");
         int result = -1;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
         try {
             //1.创建一个ps
             connection = getConnection();
+            if (connection == null) {
+                LogUtil.d(TAG, "获取数据库连接异常");
+                return -1;
+            }
             LogUtil.d(TAG, "开启事务...");
             connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -113,7 +118,7 @@ public class MySqlHelper {
                 }
             // 执行
             result = preparedStatement.executeUpdate();
-            if (result>0) {
+            if (result > 0) {
                 ResultSet rs = preparedStatement.getGeneratedKeys();
                 if (rs.next()) {
                     result = rs.getInt(1);
@@ -128,73 +133,78 @@ public class MySqlHelper {
                 LogUtil.d(TAG, "尝试回滚...");
                 connection.rollback();
             } catch (SQLException e1) {
-                // TODO Auto-generated catch block
                 e1.printStackTrace();
                 LogUtil.d(TAG, "回滚失败...");
             }
-            // TODO Auto-generated catch block
             e.printStackTrace();
-//            throw new RuntimeException(e.getMessage());
-//            throw new RuntimeException(e.getMessage());
         } finally{
             //关闭资源
             try {
                 LogUtil.d(TAG, "提交事务...");
-                connection.commit();
+                if (connection != null) {
+                    connection.commit();
+                }
             } catch (SQLException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-
             close(resultSet, preparedStatement, connection);
         }
         return result;
     }
 
     //select
-    public ResultSet executeQuery(String sql, String[] parameters){
+    public List<Map<String, String>> executeQuery(String sql, String[] parameters){
         LogUtil.d(TAG, "数据库查询操作...");
+        List<Map<String, String>> list = null;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
         ResultSet rs= null;
         try {
             connection = getConnection();
+            if (connection == null) {
+                LogUtil.d(TAG, "获取数据库连接异常");
+                return list;
+            }
             preparedStatement = connection.prepareStatement(sql);
             if(parameters != null) {
                 for (int i =0; i < parameters.length; i++) {
                     preparedStatement.setString(i + 1, parameters[i]);
                 }
             }
-            rs =preparedStatement.executeQuery();
+            rs = preparedStatement.executeQuery();
+            list = new ArrayList<>(rs.getFetchSize());
+            while (rs.next()) {
+                ResultSetMetaData metaData = rs.getMetaData();
+                int cnt = metaData.getColumnCount();
+                Map<String, String> map = new HashMap<>(cnt);
+                for(int i =1;i<cnt+1;i++) {
+                    map.put(metaData.getColumnName(i), rs.getString(metaData.getColumnName(i)));
+                }
+                list.add(map);
+            }
+            LogUtil.d(TAG, "返回查询结果");
         } catch(SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
+            LogUtil.d(TAG, "查询异常");
+            rs = null;
+        } finally {
+            close(rs, preparedStatement, connection);
         }
-        LogUtil.d(TAG, "返回查询结果");
-        return rs;
+        return list;
     }
 
-
     private void close(ResultSet rs, Statement ps, Connection conn){
-        if (rs !=null)
-            try {
-                rs.close();
-            } catch(SQLException e) {
-                e.printStackTrace();
-            }
-        rs =null;
-        if (ps !=null)
-            try {
-                ps.close();
-            } catch(SQLException e) {
-                e.printStackTrace();
-            }
-        ps =null;
-        if (conn !=null)
-            try {
-                conn.close();
-            } catch(SQLException e) {
-                e.printStackTrace();
-            }
-        conn =null;
+        try {
+            if (rs !=null) rs.close();
+            rs = null;
+            if (ps !=null) ps.close();
+            ps = null;
+            if (conn !=null) conn.close();
+            conn = null;
+        }catch (SQLException e) {
+            LogUtil.d(TAG, "关闭连接异常");
+            e.printStackTrace();
+        }
     }
 
 }
