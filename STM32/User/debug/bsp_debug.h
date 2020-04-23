@@ -52,6 +52,7 @@ PA8(USART1_CLK)
 #define DEBUG_USART_IRQHandler          USART1_IRQHandler
 
 
+
 /* 初始化串口 */
 void Debug_Gpio_Init(void);
 void Debug_Usart_Init(void);

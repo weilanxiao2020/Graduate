@@ -64,6 +64,11 @@ void Gprs_Usart_NVIC(void)
     Debug_Info(Bsp_Gprs_TAG, "bsp gprs nvic init");
 }
 
+void Gprs_Send_Data(uint8_t *data, int len)
+{
+	Usart_Send(GPRS_USART, data, len);
+}
+
 void Gprs_Wrtie_String(const char* str)
 {
     Usart_SendStr(GPRS_USART, str);
@@ -81,7 +86,7 @@ void Gprs_Write_Cmd(const char* cmd)
 	Gprs_Wrtie_String(STR_END); //再自动发送 \r\n两个字符
 }
 
-void Gprs_Write_Cmd_END(const char* cmd)
+void Gprs_Write_Cmd_End(const char* cmd)
 {
 	Gprs_Clear_Buffer(); //清空接收数据的buffer
 	Gprs_Wrtie_String(cmd); //发出字符串
@@ -109,6 +114,7 @@ void USART2_IRQHandler(void)
 {
 	uint8_t res=0;
 	res = Usart_GetByte(GPRS_USART);
+	// printf("%02x", res);
 	Gprs_Buffer[bufferHead] = res;  	  //将接收到的字符串存到缓存中
 	bufferHead++;                	  //缓存指针向后移动
 	if(bufferHead >= Buffer_Max)       	  //如果缓存满,将缓存指针指向缓存的首地址

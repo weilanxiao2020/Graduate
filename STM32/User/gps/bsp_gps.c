@@ -84,10 +84,8 @@ char Gps_Rx_Buf[Gps_Rx_Length];
 void USART3_IRQHandler(void)
 {
     byte result;
-	// printf("**\r\n");
 	if(USART_GetITStatus(GPS_USART, USART_IT_RXNE) != RESET) 
 	{
-		// printf("***\r\n");
         result =USART_ReceiveData(GPS_USART);//(USART1->DR);	//读取接收到的数据
 
         if(result == '$')

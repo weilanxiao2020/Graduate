@@ -59,3 +59,5 @@ void Debug_Usart_NVIC(void)
 	nvic_Init.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&nvic_Init);
 }
+
+

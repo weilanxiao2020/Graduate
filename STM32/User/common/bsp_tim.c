@@ -55,9 +55,9 @@ void TIM2_IRQHandler(void)
         if(_1ms_cnt==1000)
         {
             _1ms_cnt = 0;
-            Debug_Info(Bsp_Tim_TAG, "TIM2_IRQHandler");
+            // Debug_Info(Bsp_Tim_TAG, "TIM2_IRQHandler");
             tim2_flag = 1;
-            // Tim2_1s_Callback();
+            Tim2_1s_Callback();
         }
 	}		 	
 }

@@ -25,14 +25,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "gprs.h"
 
-/**
-This simple low-level implementation assumes a single connection for a single thread. Thus, a static
-variable is used for that connection.
-On other scenarios, the user must solve this by taking into account that the current implementation of
-MQTTPacket_read() has a function pointer for a function call to get the data to a buffer, but no provisions
-to know the caller or other indicator (the socket id): int (*getfn)(unsigned char*, int)
-*/
 // static int mysock = INVALID_SOCKET;
 
 // /**
@@ -41,12 +35,27 @@ to know the caller or other indicator (the socket id): int (*getfn)(unsigned cha
 //   * @param buf 发送缓冲区
 //   * @param buflen 缓冲区长度
 //   */
-// int transport_sendPacketBuffer(int sock, unsigned char* buf, int buflen)
-// {
-// 	int rc = 0;
-// 	rc = write(sock, buf, buflen);
-// 	return rc;
-// }
+int transport_sendPacketBuffer(int sock, unsigned char* buf, int buflen)
+{
+	int rc = 0;
+	Gprs_Send_Data(buf, buflen);
+	return rc;
+
+}
+
+/*计算两次的间隔时间，单位 ms*/
+uint32_t Diff_Tim(uint32_t pastim)
+{
+	uint32_t ntim;
+	
+	ntim = 0;
+	
+	if(ntim > pastim)
+		return (ntim - pastim);
+	else
+		return (0xFFFFFFFF - pastim) + ntim;
+}
+
 
 // /**
 //   * 接收数据到缓冲区 
@@ -54,12 +63,15 @@ to know the caller or other indicator (the socket id): int (*getfn)(unsigned cha
 //   * @param count 接收缓冲区长度
 //   * @return 实际接收的长度
 //   */
-// int transport_getdata(unsigned char* buf, int count)
-// {
-// 	int rc = recv(mysock, buf, count, 0);
-// 	//printf("received %d bytes count %d\n", rc, (int)count);
-// 	return rc;
-// }
+int transport_getdata(unsigned char* buf, int count)
+{
+	// int rc = recv(mysock, buf, count, 0);
+	int rc = 0;
+	char *c = Gprs_Get_Buffer();
+	memcpy(buf, (void*)c, count);//(void*)强转why?
+	//printf("received %d bytes count %d\n", rc, (int)count);
+	return rc;
+}
 
 // int transport_getdatanb(void *sck, unsigned char* buf, int count)
 // {
@@ -81,22 +93,22 @@ to know the caller or other indicator (the socket id): int (*getfn)(unsigned cha
 // @todo Basically moved from the sample without changes, should accomodate same usage for 'sock' for clarity,
 // removing indirections
 // */
-// int transport_open(char* addr, int port)
-// {
-// 	return mysock;
-// }
+int transport_open(char* addr, int port)
+{
+	return Gprs_Connect_Server(addr, port);
+}
 
 // /**
 //   * 关闭socket
 //   * @param sock socket标识符
 //   */
-// int transport_close(int sock)
-// {
-// 	int rc;
+int transport_close(int sock)
+{
+	// int rc;
 
-// 	rc = shutdown(sock, 0);
-// 	rc = recv(sock, NULL, (size_t)0, 0);
-// 	rc = close(sock);
+	// rc = shutdown(sock, 0);
+	// rc = recv(sock, NULL, (size_t)0, 0);
+	// rc = close(sock);
 
-// 	return rc;
-// }
+	return Gprs_Close();
+}

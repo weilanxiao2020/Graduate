@@ -20,13 +20,18 @@
 
 // 相关结构体定义
 typedef struct {
-	uint32_t trackId;		// 快递id
+	char trackId[16];		// 快递id
 	int64_t	 timestamp;		// 时间戳
 	uint32_t sender;		// 发送者
 	uint32_t receiver;		// 接收者
-	uint32_t address;		// 目的地
+	char address[15+1];		// 目的地
+	uint8_t status;			// 状态
 	// gps信息
 }Model;
+#define Model_Size			49		
+
+const static uint8_t Model_TrackId_Len = 15;
+const static uint8_t Model_Address_Len = 15;
 
 typedef struct {
 	uint32_t 	cardId;		// 卡片类型
@@ -45,6 +50,7 @@ typedef enum {
 	Sender = 0x40,
 	Receiver = 0x50,
 	Address = 0x60,
+	Status = 0x70,
 }CardMap;
 
 // 用户数据区域
@@ -77,16 +83,22 @@ static uint8_t sUcType = DEFAULT_UCTYPE;
 /////////////////////////////////////////////////////////////////////
 void Rfid_Init(void);
 RfidType *Rfid_Read(uint8_t cardType);
-RfidType *Rfid_Read_All(uint8_t cardType);
 uint8_t Rfid_Card_Get(void);
 void Rfid_Card_Set(uint8_t ucType);
 uint8_t Rfid_Find_Card(uint8_t* pId);
-void Rfid_Write_Sender(const RfidType* pRfid);
-void Rfid_Write(const RfidType* pRfid);
 boolean Rfid_WR_Data(uint8_t cardType, byte *data, byte map, RfidMode mode);
 // 读写多块数据
 boolean Rfid_WR_Datas(uint8_t cardType, byte *pDatas, const CardMap *maps, uint8_t length, RfidMode mode);
 
+
+/*--------------------------------------------------*/
+RfidType *Rfid_Read_All(uint8_t cardType);
+void Rfid_Write_All(const RfidType* pRfid);
+RfidType *Rfid_Read_TrackId_Address_Status(uint8_t cardType);
+void Rfid_Write_TrackId_Address_Status(const RfidType* pRfid);
+
+void Rfid_Write_Sender(const RfidType* pRfid);
+/*--------------------------------------------------*/
 // 16字节转换成n字节
 boolean byte_16_convert_byte_n(const byte *src, byte *res, uint8_t resLen);
 // n字节转换成16字节

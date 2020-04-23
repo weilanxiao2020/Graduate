@@ -11,7 +11,7 @@
 #endif
 
 /* usart硬件io口 */
-/*				usart2接ga-6b
+/*				usart2接sim900a
 				1. GND 电源地
 				2. VCC 电源正（3～5.5V）
 PA2(USART2_TX)	3. rx 数据接收，接stm32的tx
@@ -51,17 +51,20 @@ PA3(USART3_RX)	4. tx 数据发送，接stm32的rx
 #define GPRS_USART_IRQHandler          USART2_IRQHandler
 
 #define STR_END         "\r\n"          // 字符发送结束符
-#define Buffer_Max  128                // 接收缓冲区大小
+#define Buffer_Max      128                // 接收缓冲区大小
 
 /* 初始化串口 */
 void Gprs_Gpio_Init(void);
 void Gprs_Usart_Init(void);
 void Gprs_Usart_NVIC(void);
 
+void Gprs_Send_Data(uint8_t *data, int len);
+void Gprs_Wrtie_String(const char* str);
+
 void Gprs_Clear_Buffer(void);
 char *Gprs_Get_Buffer(void);
 void Gprs_Write_Cmd(const char* cmd);
-void Gprs_Write_Cmd_END(const char* cmd);
+void Gprs_Write_Cmd_End(const char* cmd);
 
 
 #endif

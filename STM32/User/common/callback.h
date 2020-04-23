@@ -11,7 +11,13 @@
     #define Callback_TAG       ""  
 #endif
 
+#define TIM2_1s_CALLBACK_LEN    5
+
 typedef void (*Tim2Callback)(void);
 void Tim2_1s_Callback(void);
-
+int8_t Tim2_Callback_Find(Tim2Callback callback);
+int8_t Tim2_Callback_Add(Tim2Callback callback);
+int8_t Tim2_Callback_Remove(Tim2Callback callback);
+uint8_t Tim2_Callback_Cnt();
+void Tim2_Callback();
 #endif
