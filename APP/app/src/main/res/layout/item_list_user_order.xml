@@ -8,47 +8,51 @@
 
     <ImageView
         android:id="@+id/iv_order"
-        android:src="@mipmap/ic_launcher"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:src="@drawable/ic_user"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_centerVertical="true"
         android:layout_margin="5dp"/>
 
     <TextView
-        android:id="@+id/tv_order_id"
+        android:id="@+id/tv_mission_license"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@id/iv_order"
         android:layout_alignTop="@id/iv_order"
         android:layout_marginTop="5dp"
         android:textSize="20sp"
-        android:text="999999999"/>
+        android:text="999999999"
+        android:visibility="gone"/>
 
     <TextView
         android:id="@+id/tv_order_region"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/iv_order"
-        android:layout_below="@id/tv_order_id"
-        android:layout_marginBottom="5dp"
+        android:layout_toEndOf="@id/iv_order"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="10dp"
+        android:layout_alignTop="@id/iv_order"
         android:textSize="10sp"
-        android:text="四川成都"/>
+        android:text="@string/tv_mission_region"/>
 
 
     <TextView
         android:id="@+id/tv_order_gps"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/iv_order"
+        android:layout_toEndOf="@id/iv_order"
+        android:layout_marginStart="5dp"
+        android:layout_marginBottom="10dp"
         android:layout_alignBottom="@id/iv_order"
-        android:layout_marginBottom="5dp"
         android:textSize="10sp"
-        android:text="120.00N,20.1564E"/>
+        android:text="@string/tv_mission_gps"/>
 
     <LinearLayout
         android:id="@+id/layout_time"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:gravity="center_vertical"
         android:layout_margin="5dp"
         android:orientation="vertical">
@@ -56,15 +60,15 @@
             android:id="@+id/tv_order_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="5dp"
-            android:text="02-29"/>
+            android:layout_marginEnd="5dp"
+            android:text="@string/tv_mission_gps_date"/>
 
         <TextView
             android:id="@+id/tv_order_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="5dp"
-            android:text="10:39"/>
+            android:layout_marginEnd="5dp"
+            android:text="@string/tv_mission_gps_time"/>
     </LinearLayout>
 
 

@@ -9,25 +9,25 @@
     android:gravity="center_vertical"
     tools:context=".module.MainActivity">
 
-
     <ImageView
-        android:src="@mipmap/ic_launcher"
+        android:src="@drawable/ic_main"
         android:layout_gravity="center_horizontal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginBottom="10dp"/>
 
     <Button
         android:id="@+id/btn_staff_login"
         android:layout_gravity="center_horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="员工"/>
+        android:text="@string/btn_staff_query"/>
 
     <Button
         android:id="@+id/btn_user"
         android:layout_gravity="center_horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="用户"/>
+        android:text="@string/btn_user_query"/>
 
 </LinearLayout>

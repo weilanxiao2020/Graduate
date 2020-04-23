@@ -10,10 +10,11 @@
     tools:context=".module.user.UserActivity">
 
     <ImageView
-        android:src="@mipmap/ic_launcher"
+        android:src="@drawable/ic_user"
         android:layout_gravity="center_horizontal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginBottom="10dp"/>
 
     <EditText
         android:id="@+id/et_user_search"
@@ -21,11 +22,12 @@
         android:gravity="center_horizontal"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:maxLength="15"
+        android:maxLength="16"
+        android:text="5420200418254144"
         android:singleLine="true"
         android:inputType="number"
         android:digits="0123456789"
-        android:hint="请输入15位单号"/>
+        android:hint="请输入16位单号"/>
 
     <Button
         android:layout_width="wrap_content"

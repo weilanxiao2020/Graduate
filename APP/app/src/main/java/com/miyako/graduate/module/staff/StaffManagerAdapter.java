@@ -1,12 +1,6 @@
 package com.miyako.graduate.module.staff;
 
 import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.miyako.graduate.R;
@@ -37,15 +31,23 @@ public class StaffManagerAdapter extends CommonAdapter<StaffOrder> {
 
     @Override
     public void setData(CommonViewHolder holder, StaffOrder data) {
-        ((TextView) holder.getView(R.id.tv_order_id)).setText(data.getId());
-        ((TextView) holder.getView(R.id.tv_order_address)).setText(data.getAddress());
-        ((TextView) holder.getView(R.id.tv_order_receiver)).setText(data.getReceiver());
-        ((TextView) holder.getView(R.id.tv_order_date)).setText(timeStamp2Date(data.getDate()).split("-")[0]);
-        ((TextView) holder.getView(R.id.tv_order_time)).setText(timeStamp2Date(data.getDate()).split("-")[1]);
+        ((TextView) holder.getView(R.id.tv_mission_license))
+                .setText(mContext.getString(R.string.tv_order_trackId, data.getId()));
+        ((TextView) holder.getView(R.id.tv_order_address))
+                .setText(mContext.getString(R.string.tv_order_address, data.getAddress()));
+        ((TextView) holder.getView(R.id.tv_mission_code))
+                .setText(mContext.getString(R.string.tv_order_receiver, data.getReceiver()));
+        ((TextView) holder.getView(R.id.tv_order_date))
+                .setText(mContext.getString(R.string.tv_order_date, timeStamp2Date(data.getDate()).split("-")[0]));
+        ((TextView) holder.getView(R.id.tv_order_time))
+                .setText(mContext.getString(R.string.tv_order_time, timeStamp2Date(data.getDate()).split("-")[1]));
     }
 
-    public static String timeStamp2Date(long seconds) {
-        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd-HH:mm");
-        return sdf.format(new Date(seconds));
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd-HH:mm");
+
+    private static String timeStamp2Date(long seconds) {
+        synchronized (sdf) {
+            return sdf.format(new Date(seconds));
+        }
     }
 }

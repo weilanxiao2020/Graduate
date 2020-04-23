@@ -54,7 +54,9 @@ public class SocketManager {
 
     private IConnectionManager mManager;
     //连接参数设置(IP,端口号),这也是一个连接的唯一标识,不同连接,该参数中的两个值至少有其一不一样
-    private ConnectionInfo info = new ConnectionInfo("192.168.1.102", 12345);
+    private String serverIp = "123.57.243.5";
+    //    private String serverIp = "192.168.1.108";
+    private ConnectionInfo info = new ConnectionInfo(serverIp, 12345);
 
     private SparseArray<ISocketCall> callMap = new SparseArray<ISocketCall>();
 

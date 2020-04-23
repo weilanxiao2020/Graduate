@@ -10,14 +10,15 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="70dp"
+        android:layout_height="80dp"
         android:orientation="horizontal">
 
         <ImageView
             android:id="@+id/iv_order"
-            android:src="@mipmap/ic_launcher"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:src="@drawable/ic_user_order"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_margin="5dp"/>
 
         <LinearLayout
             android:layout_width="0dp"
@@ -33,20 +34,10 @@
                 android:gravity="center_vertical">
                 <TextView
                     android:id="@+id/tv_title_order_id"
-                    android:layout_toRightOf="@id/iv_order"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="订单号: "
+                    android:text="@string/tv_user_order"
                     android:textSize="17sp"/>
-
-                <TextView
-                    android:id="@+id/tv_order_id"
-                    android:layout_toRightOf="@+id/tv_title_order_id"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBaseline="@id/tv_title_order_id"
-                    android:text="1234556"
-                    android:textSize="15sp"/>
             </LinearLayout>
 
             <LinearLayout
@@ -57,23 +48,11 @@
                 android:gravity="center_vertical">
 
                 <TextView
-                    android:id="@+id/tv_order_timestamp"
-                    android:layout_toRightOf="@id/iv_order"
-                    android:layout_alignParentBottom="true"
+                    android:id="@+id/tv_title_order_code"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="收件人: "
+                    android:text="@string/tv_user_receiver"
                     android:textSize="17sp"/>
-
-                <TextView
-                    android:id="@+id/tv_order_receiver"
-                    android:layout_toRightOf="@+id/tv_order_timestamp"
-                    android:layout_alignBottom="@id/tv_order_timestamp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBaseline="@id/tv_order_timestamp"
-                    android:text="匿名"
-                    android:textSize="15sp"/>
             </LinearLayout>
         </LinearLayout>
 
@@ -100,6 +79,11 @@
         </LinearLayout>
 
     </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray"/>
 
     <ListView
         android:id="@+id/lv_order_record"

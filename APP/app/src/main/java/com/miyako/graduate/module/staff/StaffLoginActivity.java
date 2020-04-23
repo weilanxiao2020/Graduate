@@ -47,8 +47,8 @@ public class StaffLoginActivity extends AppCompatActivity {
         mEtStaffCode = findViewById(R.id.et_staff_code);
         mBtnStaffLogin = findViewById(R.id.btn_staff_login);
         mBtnStaffLogin.setOnClickListener(this::login);
-        mEtStaffId.setText("1234567890");
-        mEtStaffCode.setText("167943");
+//        mEtStaffId.setText("1234567890");
+//        mEtStaffCode.setText("167943");
     }
 
     private void login(View view) {
@@ -57,12 +57,26 @@ public class StaffLoginActivity extends AppCompatActivity {
 //            return;
 //        }
         Log.d(TAG, "login=>"+mEtStaffId.getText()+","+mEtStaffCode.getText());
+        Log.d(TAG, "asdasdsadas");
 
-        SocketManager.getInstance().getMission(mEtStaffId.getText()+"-"+mEtStaffCode.getText(), new SocketManager.ISocketCall() {
+        SocketManager.getInstance()
+                .getMission(mEtStaffId.getText()+"-"+mEtStaffCode.getText(),
+                        new SocketManager.ISocketCall() {
             @Override
             public void success(List<BaseMsg> msg) {
                 Log.d(TAG, "msg: "+msg.get(0));
                 MissionMsg missionMsg = (MissionMsg) msg.get(0);
+//                Observable.timer(0, TimeUnit.MILLISECONDS)
+//                        .observeOn(AndroidSchedulers.mainThread())
+//                        .subscribe(s->{
+//                            Intent intent = new Intent(mContext, StaffManagerActivity.class);
+//                            Log.d(TAG, "license:"+mEtStaffId.getText().toString());
+//                            Log.d(TAG, "code:"+mEtStaffCode.getText().toString());
+//                            intent.putExtra(Constants.KEY_STAFF_LICENSE, mEtStaffId.getText().toString());
+//                            intent.putExtra(Constants.KEY_STAFF_CODE, mEtStaffCode.getText().toString());
+//                            intent.putExtra(Constants.KEY_STAFF_ADDRESS, missionMsg.getAddress());
+//                            startActivity(intent);
+//                        });
                 Observable.timer(0, TimeUnit.MILLISECONDS)
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(s->{

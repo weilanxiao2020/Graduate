@@ -72,10 +72,10 @@ public class StaffManagerActivity extends AppCompatActivity {
     }
 
     private void initView() {
-        mTvStaffId = findViewById(R.id.tv_order_id);
-        mTvStaffCode = findViewById(R.id.tv_order_receiver);
+        mTvStaffId = findViewById(R.id.tv_mission_license);
+        mTvStaffCode = findViewById(R.id.tv_mission_code);
         mListStaffOrder = findViewById(R.id.list_order);
-        mTvStaffAddress = findViewById(R.id.tv_staff_address);
+        mTvStaffAddress = findViewById(R.id.tv_mission_address);
 
     }
 

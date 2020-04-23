@@ -78,8 +78,8 @@ public class UserOrderActivity extends AppCompatActivity {
 
     private void initView(Bundle savedInstanceState) {
         Log.d(TAG, "init view");
-        mTvOrderId = findViewById(R.id.tv_order_id);
-        mTvOrderReceiver = findViewById(R.id.tv_order_receiver);
+        mTvOrderId = findViewById(R.id.tv_title_order_id);
+        mTvOrderReceiver = findViewById(R.id.tv_title_order_code);
         mMapView = findViewById(R.id.map_order_record);
         mListOrderGps = findViewById(R.id.lv_order_record);
         mMapView.onCreate(savedInstanceState);
@@ -156,23 +156,6 @@ public class UserOrderActivity extends AppCompatActivity {
 
             }
         });
-//        OkSocket.open(MyApplication.getInfo())
-//                .send(new ISendable() {
-//                    @Override
-//                    public byte[] parse() {
-//                        Log.d(TAG, "send data");
-//                        ReqBody<QueryMsg> reqBody = new ReqBody<>(Constants.CMD_MISSION<<8, System.currentTimeMillis(), "Android");
-//                        Gson gson = new Gson();
-//                        QueryMsg msg = new QueryMsg();
-//                        msg.setQueryId("wlx-41647");
-//                        reqBody.setData(msg);
-////                        ReqBody reqBody1 = gson.fromJson(json, ReqBody.class);
-////                        Log.d(TAG, "data json:"+reqBody1);
-//                        String json = gson.toJson(reqBody);
-//                        Log.d(TAG, "data json:"+json);
-//                        return json.getBytes();
-//                    }
-//                });
     }
 
     public void showMap(View view) {

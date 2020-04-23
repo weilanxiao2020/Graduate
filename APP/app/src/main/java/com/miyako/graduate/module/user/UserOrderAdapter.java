@@ -31,14 +31,21 @@ public class UserOrderAdapter extends CommonAdapter<GpsOrder> {
 
     @Override
     public void setData(CommonViewHolder holder, GpsOrder data) {
-        ((TextView) holder.getView(R.id.tv_order_id)).setText(data.getId()+"");
-        ((TextView) holder.getView(R.id.tv_order_gps)).setText(data.getLatitude()+"["+data.getN_S()+"], "+data.getLongitude()+"["+data.getE_W()+"]");
-        ((TextView) holder.getView(R.id.tv_order_date)).setText(timeStamp2Date(data.getUtcTime()).split("-")[0]);
-        ((TextView) holder.getView(R.id.tv_order_time)).setText(timeStamp2Date(data.getUtcTime()).split("-")[1]);
+        ((TextView) holder.getView(R.id.tv_order_gps))
+                .setText(mContext.
+                        getString(R.string.tv_mission_gps,
+                                data.getLatitude(), data.getN_S(),
+                                data.getLongitude(), data.getE_W()));
+        ((TextView) holder.getView(R.id.tv_order_date))
+                .setText(mContext.getString(R.string.tv_mission_gps_date, timeStamp2Date(data.getUtcTime()).split("-")[0]));
+        ((TextView) holder.getView(R.id.tv_order_time))
+                .setText(mContext.getString(R.string.tv_mission_gps_time, timeStamp2Date(data.getUtcTime()).split("-")[1]));
     }
 
-    public static String timeStamp2Date(long seconds) {
-        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd-HH:mm");
-        return sdf.format(new Date(seconds));
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd-HH:mm");;
+    private static String timeStamp2Date(long seconds) {
+        synchronized (sdf) {
+            return sdf.format(new Date(seconds));
+        }
     }
 }
