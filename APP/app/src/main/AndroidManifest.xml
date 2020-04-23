@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.miyako.graduation">
+    package="com.miyako.graduate">
 
     <!-- 用于进行网络定位 -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!-- 用于访问GPS定位 -->
@@ -14,7 +14,6 @@
     <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
 
     <application
-        android:name=".base.MyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -33,12 +32,11 @@
         <activity android:name=".module.staff.StaffLoginActivity"/>
         <activity android:name=".module.staff.StaffManagerActivity"/>
 
-
-        <meta-data
-            android:name="com.amap.api.v2.apikey"
-            android:value="6e3f21cbe092880950b5f65f89e751b7" />
-        <!--高德service-->
-        <service android:name="com.amap.api.location.APSService" />
+<!--        <meta-data-->
+<!--            android:name="com.amap.api.v2.apikey"-->
+<!--            android:value="6e3f21cbe092880950b5f65f89e751b7" />-->
+<!--        &lt;!&ndash;高德service&ndash;&gt;-->
+<!--        <service android:name="com.amap.api.location.APSService" />-->
     </application>
 
 </manifest>
