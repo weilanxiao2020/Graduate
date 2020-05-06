@@ -10,6 +10,7 @@ public class GpsOrder extends BaseBean {
     private String N_S;
     private String longitude;
     private String E_W;
+    private String region;
 
     public long getId() {
         return id;
@@ -59,15 +60,24 @@ public class GpsOrder extends BaseBean {
         E_W = e_W;
     }
 
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
     @Override
     public String toString() {
         return "GpsOrder{" +
                 "id=" + id +
-                ", utcTime='" + utcTime + '\'' +
+                ", utcTime=" + utcTime +
                 ", latitude='" + latitude + '\'' +
                 ", N_S='" + N_S + '\'' +
                 ", longitude='" + longitude + '\'' +
                 ", E_W='" + E_W + '\'' +
+                ", region='" + region + '\'' +
                 '}';
     }
 }

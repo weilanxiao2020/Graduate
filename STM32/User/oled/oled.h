@@ -43,6 +43,12 @@
 #define OLED_DATA 1	//写数据
 
 
+#define OLED_LINE0      0
+#define OLED_LINE1		2
+#define OLED_LINE2		4
+#define OLED_LINE3		6
+
+
 void Oled_WR_Byte(uint8_t data, uint8_t cmd);	    
 void Oled_Display_On(void);
 void Oled_Display_Off(void);	   							   		    

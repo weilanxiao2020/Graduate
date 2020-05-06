@@ -40,6 +40,8 @@ public class UserOrderAdapter extends CommonAdapter<GpsOrder> {
                 .setText(mContext.getString(R.string.tv_mission_gps_date, timeStamp2Date(data.getUtcTime()).split("-")[0]));
         ((TextView) holder.getView(R.id.tv_order_time))
                 .setText(mContext.getString(R.string.tv_mission_gps_time, timeStamp2Date(data.getUtcTime()).split("-")[1]));
+        ((TextView) holder.getView(R.id.tv_order_region))
+                .setText(mContext.getString(R.string.tv_mission_region, data.getRegion()));
     }
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd-HH:mm");;

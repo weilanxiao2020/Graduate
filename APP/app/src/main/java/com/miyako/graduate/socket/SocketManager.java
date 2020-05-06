@@ -246,4 +246,27 @@ public class SocketManager {
                     }
                 });
     }
+
+    /**
+     * 获取指定order的最新Gps
+     * @param orderId 唯一order标识，通过mission
+     * @param socketCall 返回结果回调
+     */
+    public void getOrderGpsLast(String orderId, ISocketCall socketCall) {
+        OkSocket.open(info)
+                .send(new ISendable() {
+                    @Override
+                    public byte[] parse() {
+                        addCallMap(Constants.CMD_GPS, socketCall);
+                        ReqBody<QueryMsg> reqBody = new ReqBody<>(Constants.CMD_GPS<<8|0x02, System.currentTimeMillis(), "Android");
+                        Gson gson = new Gson();
+                        QueryMsg msg = new QueryMsg();
+                        msg.setQueryId(orderId);
+                        reqBody.setData(Collections.singletonList(msg));
+                        String json = gson.toJson(reqBody);
+                        Log.d(TAG, "send data json:"+json);
+                        return json.getBytes();
+                    }
+                });
+    }
 }

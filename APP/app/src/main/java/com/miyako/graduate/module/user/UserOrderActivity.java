@@ -8,6 +8,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.amap.api.maps.MapView;
+import com.amap.api.maps.model.LatLng;
 import com.miyako.graduate.R;
 import com.miyako.graduate.base.Constants;
 import com.miyako.graduate.entity.GpsOrder;
@@ -17,6 +18,7 @@ import com.miyako.graduate.socket.msg.GpsMsg;
 import com.miyako.graduate.socket.msg.OrderMsg;
 import com.miyako.graduate.utils.MapUtil;
 
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -38,6 +40,9 @@ public class UserOrderActivity extends AppCompatActivity {
     private String receiver;
     private String mission;
     private UserOrderAdapter mAdapter;
+    private List<LatLng> points;
+
+    private boolean flag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +65,7 @@ public class UserOrderActivity extends AppCompatActivity {
         //在activity执行onResume时执行mMapView.onResume ()，重新绘制加载地图
         mMapView.onResume();
         showList(null);
+        getGpsLast();
     }
     @Override
     protected void onPause() {
@@ -96,6 +102,7 @@ public class UserOrderActivity extends AppCompatActivity {
         receiver = getIntent().getStringExtra(Constants.KEY_ORDER_RECEIVER);
         mTvOrderId.setText(orderId);
         mTvOrderReceiver.setText(receiver);
+        flag = false;
     }
 
     // 显示地图
@@ -123,6 +130,62 @@ public class UserOrderActivity extends AppCompatActivity {
         MapUtil.getInstance().changedLocation(false);
     }
 
+    int inter = 10;
+
+    private void getGpsLast() {
+        Observable.interval(inter, TimeUnit.SECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(s->{
+                    if (flag) {
+                        SocketManager.getInstance()
+                                .getOrderGpsLast(mission, new SocketManager.ISocketCall() {
+                                    @Override
+                                    public void success(List<BaseMsg> msg) {
+                                        Log.d(TAG, "msg: " + msg.get(0));
+                                        Observable.timer(0, TimeUnit.MILLISECONDS)
+                                                .observeOn(AndroidSchedulers.mainThread())
+                                                .subscribe(s -> {
+                                                    GpsMsg last = (GpsMsg) msg.get(0);
+                                                    GpsOrder order = convert(last);
+                                                    long utcTime = mAdapter.getItem(mAdapter.getCount()-1).getUtcTime();
+                                                    Log.d(TAG, "last:"+utcTime);
+                                                    Log.d(TAG, "new:"+order.getUtcTime());
+                                                    if (order.getUtcTime()>utcTime) {
+                                                        LatLng latLng = convertLatLng(order);
+                                                        points.add(latLng);
+                                                        mAdapter.update(order);
+                                                        MapUtil.getInstance().drawPath(latLng);
+                                                    }
+                                                    flag = true;
+                                                });
+                                    }
+
+                                    @Override
+                                    public void error(int errorCode, List<BaseMsg> msg) {
+
+                                    }
+                                });
+                    }
+                });
+    }
+
+    private LatLng convertLatLng(GpsOrder order) {
+        return new LatLng(Double.valueOf(order.getLatitude()), Double.valueOf(order.getLongitude()));
+    }
+
+    private GpsOrder convert(GpsMsg gpsMsg) {
+        GpsOrder order = new GpsOrder();
+        order.setId(gpsMsg.getId());
+        order.setUtcTime(Long.valueOf(gpsMsg.getUtcTime()));
+        order.setLatitude(gpsMsg.getLatitude());
+        order.setN_S(gpsMsg.getN_S());
+        order.setLongitude(gpsMsg.getLongitude());
+        order.setE_W(gpsMsg.getE_W());
+        order.setRegion(gpsMsg.getRegion());
+        Log.d(TAG, order.toString());
+        return order;
+    }
+
     public void showList(View view) {
         Log.d(TAG, "show list");
         stopMap();
@@ -133,21 +196,21 @@ public class UserOrderActivity extends AppCompatActivity {
                 Observable.timer(0, TimeUnit.MILLISECONDS)
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(s->{
-                            List<GpsOrder> orderList = new ArrayList<>(msg.size());
-                            for(int i=0;i<msg.size();i++) {
+//                            int size = msg.size()-1;
+                            int size = msg.size();
+                            List<GpsOrder> orderList = new ArrayList<>(size);
+                            if (points == null) {
+                                points = new ArrayList<>(size);
+                            }
+                            for(int i=0;i<size;i++) {
                                 GpsMsg gpsMsg = (GpsMsg) msg.get(i);
-                                GpsOrder order = new GpsOrder();
-                                order.setId(gpsMsg.getId());
-                                order.setUtcTime(Long.valueOf(gpsMsg.getUtcTime()));
-                                order.setLatitude(gpsMsg.getLatitude());
-                                order.setN_S(gpsMsg.getN_S());
-                                order.setLongitude(gpsMsg.getLongitude());
-                                order.setE_W(gpsMsg.getE_W());
-                                Log.d(TAG, order.toString());
+                                GpsOrder order = convert(gpsMsg);
                                 orderList.add(order);
+                                points.add(convertLatLng(order));
                             }
                             mAdapter.update(orderList);
                             mListOrderGps.setVisibility(View.VISIBLE);
+                            flag = true;
                         });
             }
 
@@ -161,6 +224,8 @@ public class UserOrderActivity extends AppCompatActivity {
     public void showMap(View view) {
         Log.d(TAG, "show map");
         startMap();
-        MapUtil.getInstance().setDatas(Constants.getLatLngs()).drawPath();
+        MapUtil.getInstance()
+                .setDatas(points)
+                .drawPath();
     }
 }

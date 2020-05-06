@@ -1,0 +1,10 @@
+C:\Users\Miyako\Desktop\GraduationProject\work\Graduate\Client\bin\Debug\Client.exe.config
+C:\Users\Miyako\Desktop\GraduationProject\work\Graduate\Client\bin\Debug\Client.exe
+C:\Users\Miyako\Desktop\GraduationProject\work\Graduate\Client\bin\Debug\Client.pdb
+C:\Users\Miyako\Desktop\GraduationProject\work\Graduate\Client\obj\Debug\Client.csprojAssemblyReference.cache
+C:\Users\Miyako\Desktop\GraduationProject\work\Graduate\Client\obj\Debug\Client.Properties.Resources.resources
+C:\Users\Miyako\Desktop\GraduationProject\work\Graduate\Client\obj\Debug\Client.UI.MainForm.resources
+C:\Users\Miyako\Desktop\GraduationProject\work\Graduate\Client\obj\Debug\Client.csproj.GenerateResource.cache
+C:\Users\Miyako\Desktop\GraduationProject\work\Graduate\Client\obj\Debug\Client.csproj.CoreCompileInputs.cache
+C:\Users\Miyako\Desktop\GraduationProject\work\Graduate\Client\obj\Debug\Client.exe
+C:\Users\Miyako\Desktop\GraduationProject\work\Graduate\Client\obj\Debug\Client.pdb

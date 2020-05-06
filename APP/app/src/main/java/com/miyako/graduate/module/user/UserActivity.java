@@ -46,7 +46,6 @@ public class UserActivity extends AppCompatActivity {
         initView();
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     private void initView() {
         mEtSearch = findViewById(R.id.et_user_search);
         mEtSearch.setOnTouchListener(this::onTouch);
@@ -104,7 +103,8 @@ public class UserActivity extends AppCompatActivity {
 //        }
         Log.d(TAG, "搜索单号"+mEtSearch.getText());
         hideSoft(this);
-        SocketManager.getInstance().getOrderByTrack(mEtSearch.getText().toString(), new SocketManager.ISocketCall() {
+        SocketManager.getInstance()
+                .getOrderByTrack(mEtSearch.getText().toString(), new SocketManager.ISocketCall() {
             @Override
             public void success(List<BaseMsg> msg) {
                 Log.d(TAG, "msg: "+msg.get(0));

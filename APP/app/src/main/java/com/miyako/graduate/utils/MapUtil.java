@@ -233,7 +233,15 @@ public class MapUtil {
             Log.d(TAG, mData.get(i).toString());
         }
         mMap.addPolyline(new PolylineOptions().addAll(mData).width(10).color(colorLine));
-        mMap.addPolyline(new PolylineOptions().add(mData.get(mData.size()-1), new LatLng(30.3133573552,120.3590002317)).width(10).color(colorLine));
+//        mMap.addPolyline(new PolylineOptions().add(mData.get(mData.size()-1), new LatLng(30.3133573552,120.3590002317)).width(10).color(colorLine));
+        return this;
+    }
+
+    public MapUtil drawPath(LatLng point) {
+        Log.d(TAG, "绘制移动路线");
+        isDraw = true;
+        //绘制移动路线
+        mMap.addPolyline(new PolylineOptions().add(point).width(10).color(colorLine));
         return this;
     }
 

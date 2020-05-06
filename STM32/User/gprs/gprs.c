@@ -39,11 +39,45 @@ boolean Gprs_Write_AT_Cmd_End(const char *str, const char *ack, uint8_t wait_tim
 	{
 		Gprs_Write_Cmd_End(str);//串口2发送 b 字符串 这里不发送\r\n 
 		delay_ms(interval_time); //等待一定时间 传50的话就是 50*20ms = 1秒
+		printf("receive:%s\n", Gprs_Get_Buffer());
 		if(Find_Str(Gprs_Get_Buffer(), ack))            //查找需要应答的字符串 a
 		{
 			return true;
 		}
 		cnt++;
+	}
+	return false;
+}
+
+boolean Gprs_Restart()
+{
+	boolean flag;
+	uint8_t cnt=0;
+	Gprs_Clear_Buffer();
+	while(cnt<5)
+	{
+		Debug_Info(Gprs_TAG, "wait gprs restart");
+		flag = Gprs_Write_AT_Cmd("AT+CFUN=1,1", "AT Ready",1,2500);
+		if(flag) return true;
+		else cnt++;
+	}
+	return false;
+}
+
+boolean Gprs_Wait_Net()
+{
+	boolean flag;
+	uint8_t cnt=0;
+	char *buf = NULL;
+	Gprs_Clear_Buffer();
+	while(cnt<50)
+	{
+		Debug_Info(Gprs_TAG, "wait gprs connect net");
+		delay_ms(1000);
+		buf = Gprs_Get_Buffer();
+		flag = Find_Str(buf, "+NITZ");
+		if(flag) return true;
+		else cnt++;
 	}
 	return false;
 }
@@ -55,7 +89,7 @@ boolean Gprs_Ok()
 	Gprs_Clear_Buffer();
 	while(cnt<5)
 	{
-		Debug_Info(Gprs_TAG, "wait gprs ok");
+		Debug_Info(Gprs_TAG, "wait gprs read sim");
 		flag = Gprs_Write_AT_Cmd("AT+CPIN?", "READY",3,500);
 		if(flag) return true;
 		else cnt++;

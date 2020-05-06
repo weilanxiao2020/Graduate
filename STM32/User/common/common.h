@@ -23,4 +23,20 @@ void delay_us(uint32_t us);
 #define RUN 0x04
 #define OUT 0x08
 
+#define CMD_RFID_R      0x10
+#define CMD_RFID_W      0x11
+#define CMD_RFID_E      0x12
+
+#define CMD_GPS_S       0x20
+#define CMD_GPS_E       0x21
+
+
+typedef struct {
+    // mqtt_s:0x00,0x01,0x02,0x03,0x04
+    volatile uint8_t mqtt_s;
+    // rfid_s:0x00,0x01,0x02,0x03
+    volatile uint8_t rfid_s;
+    volatile uint8_t gps_s;
+}Task;
+
 #endif

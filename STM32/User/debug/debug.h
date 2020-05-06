@@ -7,6 +7,7 @@
 #include "usart.h"
 #include "bsp_debug.h"
 #include "utils.h"
+#include "common.h"
 #include <stdio.h>
 #include <stdarg.h>
 
@@ -19,6 +20,8 @@
 #define Debug_Buf_Length    128
 #define Debug_Usart         DEBUG_USART
 #define Debug_Rx_Length  128
+
+
 
 void Debug_Init(void);
 

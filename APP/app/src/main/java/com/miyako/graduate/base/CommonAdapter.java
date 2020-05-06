@@ -38,6 +38,11 @@ public abstract class CommonAdapter<T> extends android.widget.BaseAdapter {
         notifyDataSetChanged();
     }
 
+    public void update(T data) {
+        mDatas.add(data);
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getCount() {
         return mDatas != null ? mDatas.size() : 0;

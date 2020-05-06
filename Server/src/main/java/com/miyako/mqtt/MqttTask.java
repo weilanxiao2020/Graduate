@@ -38,8 +38,7 @@ public class MqttTask {
     private void setSubscribe() {
         MqttManager.getInstance()
                    .subscribe(ServerApp.MQTT_TOPIC_SCAN_RFID_GET, this::getScanCard)
-                   .subscribe(ServerApp.MQTT_TOPIC_CARD_GPS_GET, this::getCardGps)
-                   .subscribe(ServerApp.MQTT_TOPIC_CARD_INFO_GET_TEST, this::getCardInfoTest);
+                   .subscribe(ServerApp.MQTT_TOPIC_CARD_GPS_GET, this::getCardGps);
     }
 
     private void getCardInfoTest(byte[] data){

@@ -3,6 +3,7 @@
 //#include <malloc.h>
 #include <stdlib.h>
 
+extern volatile Task _task;
 
 void Rfid_Init(void)
 {
@@ -70,7 +71,7 @@ RfidType *Rfid_Read(uint8_t cardType)
 	rfid->cardId = DEFAULT_CARD_ID;
 	rfid->cardType = cardType;
 	printf_hex("Rfid_Read buf", data, 16);
-	if(Rfid_WR_Data(cardType, data, Timestamp, Read))
+	if(Rfid_WR_Data(cardType, data, Timestamp, Read, true))
 	{
 		printf_hex("read sender", data, 16);
 		byte_16_convert_byte_n(data, pId, 4);
@@ -90,17 +91,11 @@ RfidType *Rfid_Read_All(uint8_t cardType)
 	Model *model = (Model *)calloc(1, sizeof(Model));
 	rfid->cardId = DEFAULT_CARD_ID;
 	rfid->cardType = cardType;
-	if(Rfid_WR_Datas(cardType, data, maps, 6, Read))
+	if(Rfid_WR_Datas(cardType, data, maps, 6, Read, true))
 	{
 		char trackId[16];
 		char address[16];
 		uint8_t status;
-		// printf_hex("trackId buf read", data, 16);
-		// printf_hex("timestamp buf read", data+16, 16);
-		// printf_hex("sender buf read", data+32, 16);
-		// printf_hex("receiver buf read", data+48, 16);
-		// printf_hex("address buf read", data+64, 16);
-		// printf_hex("status buf read", data+80, 16);
 
 		byte_16_convert_byte_n(data, model->trackId, 16);
 		byte_16_convert_byte_n(data+16, data+16, 8);
@@ -122,6 +117,55 @@ RfidType *Rfid_Read_All(uint8_t cardType)
 	return rfid;
 }
 
+RfidType *Rfid_Read_TrackId_Mission_Address_Status(uint8_t cardType, uint8_t isWait)
+{
+	CardMap maps[4] = {TrackId, Address, MissionId, Status};
+	byte *data = (byte *)calloc(4,sizeof(byte)*16);
+	RfidType *rfid = (RfidType *)calloc(1, sizeof(RfidType));	
+	Model *model = (Model *)calloc(1, sizeof(Model));
+	rfid->cardId = DEFAULT_CARD_ID;
+	rfid->cardType = cardType;
+	Debug_Info(Rfid_TAG, "read t m a s");
+	if(Rfid_WR_Datas(cardType, data, maps, 4, Read, isWait))
+	{
+		byte_16_convert_byte_n(data, model->trackId, 16);
+		byte_16_convert_byte_n(data+16, model->address, 16);
+		byte_16_convert_byte_n(data+32, model->missionId, 16);
+		byte_16_convert_byte_n(data+48, &(model->status), 1);
+		rfid->pData = model;
+		Led_Glint(1);
+	} else {
+		free(model);
+		free(rfid);
+		rfid = NULL;
+	}
+	free(data);
+	return rfid;
+}
+
+uint8_t Rfid_Write_TrackId_Mission_Address_Status(const RfidType* pRfid, uint8_t isWait)
+{
+	CardMap maps[4] = {TrackId, Address, MissionId, Status};
+	byte *data = (byte *)calloc(4, sizeof(byte)*16);
+	char *trackId = pRfid->pData->trackId;
+	char *address = pRfid->pData->address;
+	char *mission = pRfid->pData->missionId;
+	uint8_t status = pRfid->pData->status;
+	byte_n_convert_byte_16(trackId, 16, data);
+	byte_n_convert_byte_16(address, 16, data+16);
+	byte_n_convert_byte_16(mission, 16, data+32);
+	byte_n_convert_byte_16(&status, 1, data+48);
+	Debug_Info(Rfid_TAG, "write t m a s");
+	if(Rfid_WR_Datas(pRfid->cardType, data, maps, 4, Write, isWait)) {
+		free(data);
+		return true;
+	} else {
+		free(data);
+		return false;
+	}
+
+}
+
 RfidType *Rfid_Read_TrackId_Address_Status(uint8_t cardType)
 {
 	CardMap maps[3] = {TrackId, Address, Status};
@@ -130,7 +174,7 @@ RfidType *Rfid_Read_TrackId_Address_Status(uint8_t cardType)
 	Model *model = (Model *)calloc(1, sizeof(Model));
 	rfid->cardId = DEFAULT_CARD_ID;
 	rfid->cardType = cardType;
-	if(Rfid_WR_Datas(cardType, data, maps, 3, Read))
+	if(Rfid_WR_Datas(cardType, data, maps, 3, Read, true))
 	{
 		byte_16_convert_byte_n(data, model->trackId, 16);
 		byte_16_convert_byte_n(data+16, model->address, 16);
@@ -142,6 +186,7 @@ RfidType *Rfid_Read_TrackId_Address_Status(uint8_t cardType)
 	return rfid;
 }
 
+// 写trackId，address和status
 void Rfid_Write_TrackId_Address_Status(const RfidType* pRfid)
 {
 	CardMap maps[3] = {TrackId, Address, Status};
@@ -152,7 +197,7 @@ void Rfid_Write_TrackId_Address_Status(const RfidType* pRfid)
 	byte_n_convert_byte_16(trackId, 16, data);
 	byte_n_convert_byte_16(address, 16, data+16);
 	byte_n_convert_byte_16(&status, 1, data+32);
-	Rfid_WR_Datas(pRfid->cardType, data, maps, 3, Write);
+	Rfid_WR_Datas(pRfid->cardType, data, maps, 3, Write, true);
 	free(data);
 }
 
@@ -191,7 +236,7 @@ void Rfid_Write_All(const RfidType* pRfid)
 	byte_n_convert_byte_16(address, 16, data+64);
 	byte_n_convert_byte_16(&status, 1, data+80);
 
-	Rfid_WR_Datas(pRfid->cardType, data, maps, 6, Write);
+	Rfid_WR_Datas(pRfid->cardType, data, maps, 6, Write, true);
 	free(data);
 }
 
@@ -202,7 +247,7 @@ void Rfid_Write_Sender(const RfidType* pRfid)
 	u32_to_u8(pRfid->pData->sender, sender);
 	byte_n_convert_byte_16(sender, 4, sender);
 	printf_hex("Rfid_Write_Sender buf", sender, 16);
-	if(Rfid_WR_Data(pRfid->cardType, sender, Sender, Write))
+	if(Rfid_WR_Data(pRfid->cardType, sender, Sender, Write, true))
 	{
 		Debug_Info(Rfid_TAG, "write sender 0x%x", pRfid->pData->sender);
 		Led_Glint(1);
@@ -216,7 +261,7 @@ void Rfid_Write_Sender(const RfidType* pRfid)
  * @param map		区域映射
  * @param mode		操作类型
  */
-boolean Rfid_WR_Data(uint8_t cardType, byte *pData, byte map, RfidMode mode)
+boolean Rfid_WR_Data(uint8_t cardType, byte *pData, byte map, RfidMode mode, uint8_t isWait)
 {
 	uint8_t pId[4];/*先后存放IC卡的类型和UID(IC卡序列号)*/  
 	char status;
@@ -233,6 +278,11 @@ boolean Rfid_WR_Data(uint8_t cardType, byte *pData, byte map, RfidMode mode)
 	while ( 1 )
 	{ 
 		Led_Glint(1);
+		if(_task.rfid_s==0x00)
+		{
+			Debug_Info(Rfid_TAG, "Rfid任务未开启或已结束");
+			return false;
+		}
 		if (Rfid_Find_Card(pId) == MI_OK)
 		{
 			// 选卡	
@@ -254,9 +304,11 @@ boolean Rfid_WR_Data(uint8_t cardType, byte *pData, byte map, RfidMode mode)
 							//读写成功，串口提示信息，oled提示
 							// Tips_Success();
 							Debug_Info(Rfid_TAG, "读写数据成功");
-							delay_ms(1000);
-							// Pcd_Wait_Card_Off();
-							Debug_Info(Rfid_TAG, "等待卡片离开");
+							// delay_ms(1000);
+							if(isWait) {
+								Pcd_Wait_Card_Off();
+								Debug_Info(Rfid_TAG, "等待卡片离开");
+							}
 							return true;
 						}
 					}
@@ -275,7 +327,7 @@ boolean Rfid_WR_Data(uint8_t cardType, byte *pData, byte map, RfidMode mode)
  * @param length	区域映射数
  * @param mode		操作类型
  */
-boolean Rfid_WR_Datas(uint8_t cardType, byte *pDatas, const CardMap *maps, uint8_t length, RfidMode mode)
+boolean Rfid_WR_Datas(uint8_t cardType, byte *pDatas, const CardMap *maps, uint8_t length, RfidMode mode, uint8_t isWait)
 {
 	uint8_t pId[4];/*先后存放IC卡的类型和UID(IC卡序列号)*/  
 	char status;
@@ -292,9 +344,16 @@ boolean Rfid_WR_Datas(uint8_t cardType, byte *pDatas, const CardMap *maps, uint8
 	Debug_Info(Rfid_TAG, "读写数据...");
 	while (1)
 	{ 
+		if(_task.rfid_s==0x00)
+		{
+			Debug_Info(Rfid_TAG, "Rfid任务未开启或已结束");
+			return false;
+		}
+		
 		if (Rfid_Find_Card(pId) == MI_OK)
 		{
 			// 选卡	
+			Debug_Info(Rfid_TAG, "选卡...");
 			status = Pcd_Select(pId);
 			if(status == MI_OK)
 			{
@@ -329,8 +388,10 @@ boolean Rfid_WR_Datas(uint8_t cardType, byte *pDatas, const CardMap *maps, uint8
 				{
 					Debug_Info(Rfid_TAG, "读写所有数据成功");
 					// delay_ms(1000);
-					Pcd_Wait_Card_Off();
-					Debug_Info(Rfid_TAG, "等待卡片离开");
+					if(isWait) {
+						Pcd_Wait_Card_Off();
+						Debug_Info(Rfid_TAG, "等待卡片离开");
+					}
 					return true;
 				}
 			}
@@ -380,3 +441,4 @@ boolean byte_n_convert_byte_16(const byte *src, uint8_t srcLen, byte *dest)
 
 	return true;
 }
+

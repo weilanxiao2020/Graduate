@@ -45,7 +45,7 @@ public class ServerApp{
         MQTT_TOPIC_SCAN_RFID_GET = properties.getProperty("mqtt_tpoic_scan_rfid_get");
         MQTT_TOPIC_CARD_GPS_GET = properties.getProperty("mqtt_topic_card_gps_get");
         MQTT_TOPIC_CARD_MISSION_SET = properties.getProperty("mqtt_topic_card_mission_set");
-        MQTT_TOPIC_CARD_INFO_GET_TEST = properties.getProperty("mqtt_tpoic_card_info_get_test");
+        //MQTT_TOPIC_CARD_INFO_GET_TEST = properties.getProperty("mqtt_tpoic_card_info_get_test");
 
     }
 

@@ -5,6 +5,8 @@ char Debug_Receive_Head;
 char Debug_Send_Buf[Debug_Buf_Length];
 char Debug_Send_Head;
 
+extern volatile Task _task;
+
 void Debug_Init(void)
 {
 #ifdef GZ_DEBUG
@@ -21,52 +23,6 @@ char Debug_Rx_Buf[Debug_Rx_Length];
 volatile uint8_t cmd_task;
 uint8_t dataLen;
 char Data_Buf[Debug_Rx_Length];
-void USART1_IRQHandler(void)
-{
-    uint8_t result;
-	if(USART_GetITStatus(DEBUG_USART, USART_IT_RXNE) != RESET) 
-	{
-        USART_ClearITPendingBit(DEBUG_USART,USART_IT_RXNE);
-        result = USART_ReceiveData(DEBUG_USART);//(USART1->DR);	//读取接收到的数据
-        if(result != '<') {
-            // USART_SendData(DEBUG_USART, result);
-            Debug_Rx_Buf[ptr++] = result;
-            // Debug_Info(Debug_TAG, Debug_Rx_Buf);
-        }
-        else {
-            Debug_Info(Debug_TAG, Debug_Rx_Buf);
-            Debug_Info(Debug_TAG, "end"); 
-            if(parseCMD_Rfid_R()) {	
-                // 读取rfid
-                dataLen = ptr-7;
-                cmd_task = 0x03;
-                memset(Data_Buf, 0, Debug_Rx_Length);      //清空
-				memcpy(Data_Buf, Debug_Rx_Buf+7, dataLen); 	//保存数据
-                Debug_Error(Debug_TAG, "cmd:%x,%s", cmd_task, Data_Buf);
-            } else if(parseCMD_Rfid_W()) {
-                // 写入rfid
-                dataLen = ptr-7;
-                cmd_task = 0x04;
-                memset(Data_Buf, 0, Debug_Rx_Length);      //清空
-				memcpy(Data_Buf, Debug_Rx_Buf+7, dataLen); 	//保存数据
-                Debug_Error(Debug_TAG, "cmd:%x,%s", cmd_task, Data_Buf);
-            } else if (parseCMD_Gps_S()) {
-                dataLen = ptr-6;
-                cmd_task = 0x05;
-                memset(Data_Buf, 0, Debug_Rx_Length);      //清空
-                Debug_Error(Debug_TAG, "cmd:%x,%s", cmd_task, Data_Buf);
-            } else if (parseCMD_Gps_E()) {
-                dataLen = ptr-6;
-                cmd_task = 0x06;
-                memset(Data_Buf, 0, Debug_Rx_Length);      //清空
-                Debug_Error(Debug_TAG, "cmd:%x,%s", cmd_task, Data_Buf);
-            }
-            
-            ptr = 0;
-            memset(Debug_Rx_Buf, 0, Debug_Rx_Length);      //清空
-        }
-    }
-}
 
 uint8_t parseCMD_Rfid_R()
 {
@@ -80,7 +36,6 @@ uint8_t parseCMD_Rfid_R()
     return 1;
     else return 0;
 }
-
 
 uint8_t parseCMD_Rfid_W()
 {
@@ -117,6 +72,78 @@ uint8_t parseCMD_Gps_E()
             Debug_Rx_Buf[5] == '>')
     return 1;
     else return 0;
+}
+
+uint8_t parseCMD_RFID_E()
+{
+    if(Debug_Rx_Buf[0] == 'r' && 
+            Debug_Rx_Buf[1] == 'f' && 
+            Debug_Rx_Buf[2] == 'i' && 
+            Debug_Rx_Buf[3] == 'd' &&
+            Debug_Rx_Buf[4] == '|' &&
+            Debug_Rx_Buf[5] == 'E' &&
+            Debug_Rx_Buf[6] == '>')
+    return 1;
+    else return 0;
+}
+
+void USART1_IRQHandler(void)
+{
+    uint8_t result;
+	if(USART_GetITStatus(DEBUG_USART, USART_IT_RXNE) != RESET) 
+	{
+        USART_ClearITPendingBit(DEBUG_USART,USART_IT_RXNE);
+        result = USART_ReceiveData(DEBUG_USART);//(USART1->DR);	//读取接收到的数据
+        if(result != '<') {
+            // USART_SendData(DEBUG_USART, result);
+            Debug_Rx_Buf[ptr++] = result;
+            // Debug_Info(Debug_TAG, Debug_Rx_Buf);
+        }
+        else {
+            Debug_Info(Debug_TAG, Debug_Rx_Buf);
+            Debug_Info(Debug_TAG, "end"); 
+            if(parseCMD_Rfid_R()) {	
+                // 读取rfid
+                dataLen = ptr-7;
+                cmd_task = CMD_RFID_R;
+                _task.rfid_s = 0x01;
+                memset(Data_Buf, 0, Debug_Rx_Length);      //清空
+				memcpy(Data_Buf, Debug_Rx_Buf+7, dataLen); 	//保存数据
+                Debug_Error(Debug_TAG, "cmd:%x,%s", cmd_task, Data_Buf);
+            } else if(parseCMD_Rfid_W()) {
+                // 写入rfid
+                dataLen = ptr-7;
+                cmd_task = CMD_RFID_W;
+                 _task.rfid_s = 0x01;
+                memset(Data_Buf, 0, Debug_Rx_Length);      //清空
+				memcpy(Data_Buf, Debug_Rx_Buf+7, dataLen); 	//保存数据
+                Debug_Error(Debug_TAG, "cmd:%x,%s", cmd_task, Data_Buf);
+            } else if (parseCMD_Gps_S()) {
+                dataLen = ptr-6;
+                cmd_task = CMD_GPS_S;
+                _task.gps_s = 0x01;
+                memset(Data_Buf, 0, Debug_Rx_Length);      //清空
+                Debug_Error(Debug_TAG, "cmd:%x,%s", cmd_task, Data_Buf);
+            } else if (parseCMD_Gps_E()) {
+                dataLen = ptr-6;
+                cmd_task = CMD_GPS_E;
+                _task.gps_s = 0x00;
+                memset(Data_Buf, 0, Debug_Rx_Length);      //清空
+                Debug_Error(Debug_TAG, "cmd:%x,%s", cmd_task, Data_Buf);
+            } else if (parseCMD_RFID_E()) {
+                // 终止rfid
+                dataLen = ptr-7;
+                cmd_task = CMD_RFID_E;
+                _task.rfid_s = 0x00;
+                memset(Data_Buf, 0, Debug_Rx_Length);      //清空
+				memcpy(Data_Buf, Debug_Rx_Buf+7, dataLen); 	//保存数据
+                Debug_Error(Debug_TAG, "cmd:%x,%s", cmd_task, Data_Buf);
+            }
+            
+            ptr = 0;
+            memset(Debug_Rx_Buf, 0, Debug_Rx_Length);      //清空
+        }
+    }
 }
 
 void logI(const char *type, const char *func, const char *file, const char *format, ...)

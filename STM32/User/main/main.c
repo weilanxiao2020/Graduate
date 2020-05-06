@@ -11,9 +11,11 @@
 #include "MQTTPacket.h"
 #include "transport.h"
 #include "callback.h"
+#include "mqtt.h"
+#include "task.h"
 #include <stdlib.h>
 
-void Task_Rfid_Read()
+void Task_Rfid_Read_Test()
 {
 	RfidType *data;
 	char *str = (char *)malloc(17);
@@ -31,7 +33,7 @@ void Task_Rfid_Read()
 }
 
 
-void Task_Rfid_Write(const char *data)
+void Task_Rfid_Write_Test(const char *data)
 {
 	RfidType *rfid = (RfidType *)calloc(1, sizeof(RfidType));
 	Model *model = (Model *)calloc(1, sizeof(Model));
@@ -187,6 +189,14 @@ exit:
 }
 #endif
 
+void Mqtt()
+{
+	char *data = (char*) calloc(10, sizeof(char*));
+	data = (char*)u32_to_str(123456789);
+	Mqtt_Init();
+	Mqtt_Publish(Topic_Card_Test, data,10,0);
+}
+
 extern volatile uint8_t cmd_task;
 extern char Data_Buf[Debug_Rx_Length];
 extern uint8_t dataLen;
@@ -207,7 +217,10 @@ int main(void)
     Tim2_NVIC();
 	Tim2_Callback_Init();
 	Tim2_Start();
+	Mqtt_Init();
+	Oled_Clear();
 
+	Task_Status();
 	/*-------------------打印系统信息-------------------*/
 	Debug_Error("main", "GraduationProject");
 	Debug_Error("main", "魏蓝骁");
@@ -218,48 +231,47 @@ int main(void)
 	// printf("gprs server result:%d\n", Gprs_Send_Data_to_Server());
 	/*-------------------模块功能开始-------------------*/
 	
-	Oled_Test();
-	// if(Gprs_Ok()) 
-	// {
-	// 	if(Gprs_Set_CREG(3))
-	// 	{
-	// 		Oled_Show_String(0,2, "GPRS:OK");
-	// 		Gprs_Send_Data_to_Server("\"123.57.243.5\",12345", "hello aliyun 233");
-	// 	} else {
-	// 		Oled_Show_String(0,2, "GPRS:ERROR");
-	// 	}
-	// } else {
-	// 	Oled_Show_String(0,2, "GPRS:NO SIM");
-	// }
-	// Rifd();
+	// Oled_Test();
+	// Mqtt();
 	while(1)
 	{	
+		// Task_Status();
 		switch (cmd_task)
 		{
-			case 0x03:
+			case CMD_RFID_R:
 				Debug_Info("main", Data_Buf); 
 				Debug_Info("main", "rfid读取");
-				Task_Rfid_Read();
+				// Task_Rfid_Read();
+				Task_Rfid_Scan();
 				cmd_task = 0x00;
 				break;
-			case 0x04:
+			case CMD_RFID_W:
 				Debug_Info("main", Data_Buf); 
 				Debug_Info("main", "rfid写入");
 				Task_Rfid_Write(Data_Buf);
 				Debug_Info("main", "rfid完成");
 				cmd_task = 0x00;
 				break;
-			case 0x05:
+			case CMD_GPS_S:
 				Debug_Info("main", "开启gps");
 				gps_index = Tim2_Callback_Add(Gps_Data_Get);
 				if(gps_index == -1) {
 					Debug_Info("main", "gps回调设置失败");	
 				}
+				Task_Gps_S();
 				cmd_task = 0x00;
 				break;
-			case 0x06:
+			case CMD_GPS_E:
 				Debug_Info("main", "关闭gps");
-				Tim2_Callback_Remove(Gps_Data_Get);
+				if(Tim2_Callback_Remove(Gps_Data_Get) == -1) {
+					Debug_Info("main", "gps回调移除失败");	
+				}
+				Task_Gps_E();
+				cmd_task = 0x00;
+				break;
+			case CMD_RFID_E:
+				Debug_Info("main", "结束Rfid");
+				Task_Gps_E();
 				cmd_task = 0x00;
 				break;
 			default:
