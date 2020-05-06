@@ -5,11 +5,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import com.miyako.dao.OrderDao;
 import com.miyako.model.Order;
+import com.miyako.parse.ParseDao;
 import com.miyako.result.ReqBody;
 import com.miyako.result.ResBody;
 import com.miyako.result.msg.OrderMsg;
 import com.miyako.result.msg.QueryMsg;
-import com.miyako.utils.ConvertUtil;
 import com.miyako.utils.LogUtil;
 import com.miyako.utils.ServerApp;
 
@@ -68,8 +68,7 @@ public class OrderTask extends BaseTask{
             return new ResBody<>(ServerApp.CMD_ORDER_READ_BY_TRACK, System.currentTimeMillis(),
                                  ServerApp.RESPONSE_ERROR + getAddress());
         }
-        OrderMsg msg = new OrderMsg();
-        ConvertUtil.orderToOrderMsg(order, msg);
+        OrderMsg msg = ParseDao.orderToOrderMsg(order);
         ResBody<OrderMsg> resBody = new ResBody<>(ServerApp.CMD_ORDER_READ_BY_MISSION, System.currentTimeMillis(),
                                                   ServerApp.RESPONSE_SUCCESS + getAddress());
         resBody.setData(Collections.singletonList(msg));
@@ -89,8 +88,7 @@ public class OrderTask extends BaseTask{
         }
         List<OrderMsg> msgList = new ArrayList<>(orders.size());
         for (Order order : orders) {
-            OrderMsg msg = new OrderMsg();
-            ConvertUtil.orderToOrderMsg(order, msg);
+            OrderMsg msg = ParseDao.orderToOrderMsg(order);
             msgList.add(msg);
         }
         ResBody<OrderMsg> resBody = new ResBody<>(ServerApp.CMD_ORDER_READ_BY_MISSION, System.currentTimeMillis(),

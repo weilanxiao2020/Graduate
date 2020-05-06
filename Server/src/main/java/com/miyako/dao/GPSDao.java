@@ -46,8 +46,8 @@ public class GPSDao {
     public static GPS findByTrackId(int track) {
         LogUtil.d(TAG, "findByTrackId: "+track);
         List<Map<String, String>> mapList = MySqlHelper.getInstance().executeQuery(SQL_SELECT_TRACK, new String[]{String.valueOf(track)});
-        List<GPS> missions = create(mapList);
-        return missions.size()==0?null:missions.get(0);
+        List<GPS> gpsList = create(mapList);
+        return gpsList.size()==0?null:gpsList.get(0);
     }
 
     private static final String SQL_SELECT_MISSION =
@@ -57,8 +57,19 @@ public class GPSDao {
     public static List<GPS> findByMissionId(String mission) {
         LogUtil.d(TAG, "findByMissionId: "+mission);
         List<Map<String, String>> mapList = MySqlHelper.getInstance().executeQuery(SQL_SELECT_MISSION, new String[]{mission});
-        List<GPS> missions = create(mapList);
-        return missions;
+        List<GPS> gpsList = create(mapList);
+        return gpsList;
+    }
+
+    private static final String SQL_SELECT_LAST =
+            "SELECT tb_gps.`id`, tb_gps.`timestamp`, tb_gps.`latitude`, tb_gps.`longitude`, " +
+            "tb_gps.`region`, tb_gps.`missionId`"
+            +"FROM tb_gps WHERE tb_gps.`missionId` = ? ORDER BY tb_gps.`timestamp` desc limit 1";
+    public static GPS findByMissionIdLast(String mission) {
+        LogUtil.d(TAG, "findByMissionIdLast:"+mission);
+        List<Map<String, String>> mapList = MySqlHelper.getInstance().executeQuery(SQL_SELECT_LAST, new String[]{mission});
+        List<GPS> gpsList = create(mapList);
+        return gpsList.size()==0?null:gpsList.get(0);
     }
 
     private static final String SQL_INSERT =

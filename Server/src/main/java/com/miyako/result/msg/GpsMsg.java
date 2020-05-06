@@ -15,6 +15,7 @@ public class GpsMsg extends BaseMsg{
     private String N_S;
     private String longitude;
     private String E_W;
+    private String region;
 
     public int getId(){
         return id;
@@ -72,6 +73,14 @@ public class GpsMsg extends BaseMsg{
         E_W = e_W;
     }
 
+    public String getRegion(){
+        return region;
+    }
+
+    public void setRegion(String region){
+        this.region = region;
+    }
+
     @Override
     public String toString(){
         return "GpsMsg{" +
@@ -82,6 +91,7 @@ public class GpsMsg extends BaseMsg{
                ", N_S='" + N_S + '\'' +
                ", longitude='" + longitude + '\'' +
                ", E_W='" + E_W + '\'' +
+               ", region='" + region + '\'' +
                '}';
     }
 }

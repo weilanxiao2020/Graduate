@@ -1,6 +1,7 @@
 package com.miyako.utils;
 
 import com.google.gson.Gson;
+import sun.rmi.runtime.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -65,6 +66,33 @@ public class VerifyUtil {
         //for (int i =0;i<provinceCity.provinces.length;i++) {
         //    LogUtil.d(TAG, provinceCity.provinces[i].province);
         //}
+    }
+
+    public static boolean verfiyRegion(int adCode) {
+        String code = adCode+"";
+        for(int i =0;i<provinceCity.provinces.length;i++) {
+            Province province = provinceCity.provinces[i];
+            String pre = (province.code+"").substring(0,2);
+            if (code.startsWith(pre)) {
+                LogUtil.d(TAG, "pre:"+pre);
+                for(int j =0;j<province.cities.length;j++) {
+                    City city = province.cities[j];
+                    String pre_mid = (city.code+"").substring(0,4);
+                    if(code.startsWith(pre_mid)) {
+                        LogUtil.d(TAG, "pre mid:"+pre_mid);
+                        for (int k = 0; k < city.districts.length; k++) {
+                            District district = city.districts[k];
+                            LogUtil.d(TAG, "code:"+district.code);
+                            if ((district.code+"").startsWith(code)) {
+                                LogUtil.d(TAG, String.format("匹配：%s-%s-%s", province.province,city.city,district.district));
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     public static boolean verfiyRegion(String address) {

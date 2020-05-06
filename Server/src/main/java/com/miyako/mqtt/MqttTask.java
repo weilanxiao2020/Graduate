@@ -1,8 +1,10 @@
 package com.miyako.mqtt;
 
+import com.miyako.model.GPS;
+import com.miyako.model.Order;
+import com.miyako.parse.ParseMqtt;
 import com.miyako.utils.LogUtil;
 import com.miyako.utils.ServerApp;
-import com.sun.javafx.binding.StringFormatter;
 
 /**
  * ClassName MqttTask
@@ -44,11 +46,6 @@ public class MqttTask {
         LogUtil.d(TAG, "getCardInfoTest byte size=>"+data.length);
         StringBuilder sb = new StringBuilder();
         for (byte datum : data) {
-            //sb.append(String.format("%02x",data[i]));
-            //if (i%4==0 && i!=0) {
-            //    LogUtil.d(TAG, "0x"+sb.toString());
-            //    sb = new StringBuilder();
-            //}
             LogUtil.d(TAG, String.format("%02x", datum));
         }
     }
@@ -59,7 +56,7 @@ public class MqttTask {
      */
     private void getScanCard(byte[] data) {
         LogUtil.d(TAG, "getScanCard byte size=>"+data.length);
-        MqttMsg.parseRfid(data);
+        Order order = ParseMqtt.parseRfidMqtt(data);
     }
 
     /**
@@ -68,6 +65,6 @@ public class MqttTask {
      */
     private void getCardGps(byte[] data) {
         LogUtil.d(TAG, "getCardGps byte size=>"+data.length);
-        MqttMsg.parseGpsMsg(data);
+        GPS gps = ParseMqtt.parseGpsMqtt(data);
     }
 }

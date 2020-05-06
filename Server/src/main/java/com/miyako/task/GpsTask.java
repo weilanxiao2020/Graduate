@@ -4,17 +4,12 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import com.miyako.dao.GPSDao;
-import com.miyako.dao.OrderDao;
 import com.miyako.model.GPS;
-import com.miyako.model.Mission;
-import com.miyako.model.Order;
+import com.miyako.parse.ParseDao;
 import com.miyako.result.ReqBody;
-import com.miyako.result.msg.BaseMsg;
 import com.miyako.result.msg.GpsMsg;
 import com.miyako.result.ResBody;
-import com.miyako.result.msg.OrderMsg;
 import com.miyako.result.msg.QueryMsg;
-import com.miyako.utils.ConvertUtil;
 import com.miyako.utils.LogUtil;
 import com.miyako.utils.ServerApp;
 
@@ -52,11 +47,32 @@ public class GpsTask extends BaseTask{
             case ServerApp.CMD_GPS_WRITE:
                 result = writeGps();
                 break;
+            case ServerApp.CMD_GPS_LAST:
+                result = readLastGps();
+                break;
             default:
                 result = null;
                 break;
         }
         return result;
+    }
+
+    private ResBody<GpsMsg> readLastGps(){
+        // 从数据库读取原始gps数据
+        Gson gson = new Gson();
+        ReqBody<QueryMsg> reqBody = gson.fromJson(getBody(), new TypeToken<ReqBody<QueryMsg>>() {}.getType());
+        String mission = reqBody.getData().get(0).getQueryId();
+        GPS gps = GPSDao.findByMissionIdLast(mission);
+        if (gps==null) {
+            return new ResBody<>(ServerApp.CMD_GPS_READ, System.currentTimeMillis(),
+                                 ServerApp.RESPONSE_ERROR + getAddress());
+        }
+        GpsMsg gpsMsg = ParseDao.gpsToGpsMsg(gps);
+        ResBody<GpsMsg> resBody = new ResBody<>(ServerApp.CMD_GPS_READ, System.currentTimeMillis(),
+                                                ServerApp.RESPONSE_SUCCESS + getAddress());
+
+        resBody.setData(Collections.singletonList(gpsMsg));
+        return resBody;
     }
 
     // code:0xf300，读取指定mission的gps数据
@@ -72,8 +88,7 @@ public class GpsTask extends BaseTask{
         }
         List<GpsMsg> msgList = new ArrayList<>(gpsList.size());
         for (GPS gps : gpsList) {
-            GpsMsg msg = new GpsMsg();
-            ConvertUtil.gpsToGpsMsg(gps, msg);
+            GpsMsg msg = ParseDao.gpsToGpsMsg(gps);
             msgList.add(msg);
         }
         ResBody<GpsMsg> resBody = new ResBody<>(ServerApp.CMD_GPS_READ, System.currentTimeMillis(),
@@ -91,13 +106,13 @@ public class GpsTask extends BaseTask{
         Gson gson = new Gson();
         ReqBody<GpsMsg> reqBody = gson.fromJson(getBody(), new TypeToken<ReqBody<QueryMsg>>() {}.getType());
         GpsMsg gpsMsg = reqBody.getData().get(0);
-        GPS gps = new GPS();
         ResBody<GpsMsg> resBody;
         if (gpsMsg == null) {
             resBody = new ResBody<>(ServerApp.CMD_GPS_WRITE, System.currentTimeMillis(),
                                                     ServerApp.RESPONSE_ERROR + getAddress());
         } else {
-            ConvertUtil.gpsMsgToGps(gpsMsg, gps);
+            GPS gps = ParseDao.gpsMsgToGps(gpsMsg);
+            GPSDao.insert(gps);
             resBody = new ResBody<>(ServerApp.CMD_GPS_WRITE, System.currentTimeMillis(),
                                                     ServerApp.RESPONSE_SUCCESS + getAddress());
 

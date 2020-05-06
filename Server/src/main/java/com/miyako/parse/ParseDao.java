@@ -1,27 +1,25 @@
-package com.miyako.utils;
+package com.miyako.parse;
 
 import com.miyako.model.GPS;
 import com.miyako.model.Mission;
 import com.miyako.model.Order;
-import com.miyako.result.ResBody;
 import com.miyako.result.msg.GpsMsg;
 import com.miyako.result.msg.MissionMsg;
 import com.miyako.result.msg.OrderMsg;
 
-import java.util.List;
-
 /**
- * ClassName ConvertUtil
+ * ClassName ParseDao
  * Description //TODO
  * Author Miyako
- * Date 2020-04-03-0003 16:52
+ * Date 2020-05-02-0002 15:38
  */
-public class ConvertUtil{
+public class ParseDao{
 
-    private static final String TAG = ConvertUtil.class.getSimpleName();
+    private static final String TAG = ParseDao.class.getSimpleName();
 
     // gpsmsg为utc时间
-    public static void gpsToGpsMsg(GPS gps, GpsMsg gpsMsg){
+    public static GpsMsg gpsToGpsMsg(GPS gps){
+        GpsMsg gpsMsg = new GpsMsg();
         //LogUtil.d(TAG, "GPS -> GpsMsg");
         if (gps == null) {
             gpsMsg.setId(0);
@@ -30,6 +28,7 @@ public class ConvertUtil{
             gpsMsg.setN_S("none");
             gpsMsg.setLongitude("0.0");
             gpsMsg.setE_W("none");
+            gpsMsg.setRegion("none");
         } else {
             gpsMsg.setId(gps.getId());
             gpsMsg.setMissionId(String.valueOf(gps.getMissionId()));
@@ -40,33 +39,42 @@ public class ConvertUtil{
             gpsMsg.setLongitude(gps.getLongitude().substring(0,gps.getLongitude().length()-1));
             String e_w = gps.getLongitude().substring(gps.getLongitude().length() - 1);
             gpsMsg.setE_W(e_w.matches("[ewEW]")?e_w:"none");
+            gpsMsg.setRegion(gps.getRegion());
         }
+        return gpsMsg;
     }
 
     // gpsmsg为utc时间
-    public static void gpsMsgToGps(GpsMsg gpsMsg, GPS gps){
-        //LogUtil.d(TAG, "GpsMsg -> GPS");
+    public static GPS gpsMsgToGps(GpsMsg gpsMsg){
+        GPS gps = new GPS();
+
         gps.setMissionId(gpsMsg.getMissionId());
         gps.setTimestamp(Long.valueOf(gpsMsg.getUtcTime()));
         gps.setLatitude(gpsMsg.getLatitude()+gpsMsg.getN_S());
         gps.setLongitude(gpsMsg.getLongitude()+gpsMsg.getE_W());
         gpsMsg.setUtcTime(String.valueOf(gps.getTimestamp()));
+
+        return gps;
     }
 
-    public static String missionId2LicenseCode(String license, String code) {
+    private static String missionId2LicenseCode(String license, String code) {
         return license+"-"+code;
     }
 
-    public static void missionToMissionMsg(Mission mission, MissionMsg missionMsg){
-        //LogUtil.d(TAG, "Mission -> MissionMsg");
+    public static MissionMsg missionToMissionMsg(Mission mission){
+        MissionMsg missionMsg = new MissionMsg();
+
         missionMsg.setMissionId(missionId2LicenseCode(mission.getLicense(), mission.getCode()));
         missionMsg.setTimestamp(mission.getTimestamp());
         missionMsg.setAddress(mission.getAddress());
         missionMsg.setStatus(mission.getStatus());
+
+        return missionMsg;
     }
 
-    public static void orderToOrderMsg(Order order, OrderMsg orderMsg){
-        //LogUtil.d(TAG, "Order -> OrderMsg");
+    public static OrderMsg orderToOrderMsg(Order order){
+        OrderMsg orderMsg = new OrderMsg();
+
         orderMsg.setTrackId(order.getTrackId());
         orderMsg.setTimestamp(order.getTimestamp());
         orderMsg.setSender(order.getSender());
@@ -74,5 +82,7 @@ public class ConvertUtil{
         orderMsg.setAddress(order.getAddress());
         orderMsg.setStatus(order.getStatus());
         orderMsg.setMissionId(order.getMissionId());
+
+        return orderMsg;
     }
 }

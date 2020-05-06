@@ -23,7 +23,7 @@ public class Main {
         try {
             ServerApp.readConfig();
             VerifyUtil.init();
-            if (VerifyUtil.verfiyRegion("北京-海淀-")) {
+            if (VerifyUtil.verfiyRegion(320105)) {
                 LogUtil.d(TAG, "校验成功");
             }else{
                 LogUtil.d(TAG, "校验失败");
@@ -32,12 +32,12 @@ public class Main {
         catch (IOException e) {
             e.printStackTrace();
         }
-        MySqlHelper.getInstance()
-                   .init(ServerApp.MYSQL_JDBC, ServerApp.MYSQL_URL,
-                         ServerApp.MYSQL_USERNAME, ServerApp.MYSQL_PASSWORD, true);
-        new MySocket(12345).start(); // 监听指定端口
-        new MqttTask().start();
-        LogUtil.d(TAG, "server is running...");
+        //MySqlHelper.getInstance()
+        //           .init(ServerApp.MYSQL_JDBC, ServerApp.MYSQL_URL,
+        //                 ServerApp.MYSQL_USERNAME, ServerApp.MYSQL_PASSWORD, true);
+        //new MySocket(12345).start(); // 监听指定端口
+        //new MqttTask().start();
+        //LogUtil.d(TAG, "server is running...");
         //LogUtil.d(TAG, "findByAllMission");
         //List<Mission> list = MissionDao.findAll();
         //list.forEach(s -> LogUtil.d(TAG, s.toString()));

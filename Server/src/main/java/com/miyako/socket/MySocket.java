@@ -101,21 +101,6 @@ public class MySocket{
         }
     }
 
-    //private ResBody<GpsMsg> sendGpsJson(String ip){
-    //    GpsMsg gpsMsg = new GpsMsg();
-    //    gpsMsg.setUtcTime(System.currentTimeMillis() + "");
-    //    gpsMsg.setLatitude("30.3126719672");
-    //    gpsMsg.setN_S("N");
-    //    gpsMsg.setLongitude("120.3566998243");
-    //    gpsMsg.setE_W("E");
-    //    ResBody<GpsMsg> resBody = new ResBody<>(ServerApp.CMD_GPS, System.currentTimeMillis(),
-    //                                            ServerApp.RESPONSE_SUCCESS + ip);
-    //    resBody.setData(gpsMsg);
-    //
-    //    return resBody;
-    //}
-
-
     // 解析对象
     public static Result readMessage(JsonReader reader) {
         ReqBody req = new ReqBody();

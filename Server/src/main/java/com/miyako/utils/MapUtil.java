@@ -3,7 +3,6 @@ package com.miyako.utils;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import sun.rmi.runtime.Log;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -92,6 +91,7 @@ public class MapUtil{
             JsonObject regeocode = object.getAsJsonObject("regeocode");  // 转化为对象
             JsonObject addressComponent = regeocode.getAsJsonObject("addressComponent");
             String province = addressComponent.get("province").getAsString();
+            String adCode = addressComponent.get("adcode").getAsString();
             if (!addressComponent.get("city").isJsonArray()) {
                 String city = addressComponent.get("city").getAsString();
                 //System.out.println(province+"-"+city);
@@ -101,6 +101,7 @@ public class MapUtil{
                 //System.out.println(province+"-"+district);
                 region = String.format("%s-%s",province, district);
             }
+            region = adCode;
         }
         return region;
     }

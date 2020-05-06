@@ -5,17 +5,14 @@ import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import com.miyako.dao.MissionDao;
 import com.miyako.model.Mission;
+import com.miyako.parse.ParseDao;
 import com.miyako.result.ReqBody;
 import com.miyako.result.ResBody;
-import com.miyako.result.msg.BaseMsg;
 import com.miyako.result.msg.MissionMsg;
 import com.miyako.result.msg.QueryMsg;
-import com.miyako.utils.ConvertUtil;
 import com.miyako.utils.LogUtil;
 import com.miyako.utils.ServerApp;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 
 /**
@@ -66,8 +63,7 @@ public class MissionTask extends BaseTask{
             return new ResBody<>(ServerApp.CMD_MISSION_READ, System.currentTimeMillis(),
                                  ServerApp.RESPONSE_ERROR + getAddress());
         }
-        MissionMsg missionMsg = new MissionMsg();
-        ConvertUtil.missionToMissionMsg(mission, missionMsg);
+        MissionMsg missionMsg = ParseDao.missionToMissionMsg(mission);
         ResBody<MissionMsg> resBody = new ResBody<>(ServerApp.CMD_MISSION_READ, System.currentTimeMillis(),
                                                 ServerApp.RESPONSE_SUCCESS + getAddress());
         resBody.setData(Collections.singletonList(missionMsg));

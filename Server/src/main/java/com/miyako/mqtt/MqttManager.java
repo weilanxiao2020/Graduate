@@ -7,6 +7,8 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.sun.corba.se.impl.util.Utility.printStackTrace;
+
 /**
  * ClassName MqttManager
  * Description //TODO
@@ -86,6 +88,8 @@ public class MqttManager{
                 @Override
                 public void connectionLost(Throwable throwable){
                     LogUtil.d(TAG, "connectionLost");
+                    LogUtil.e(TAG, throwable.getCause().getMessage());
+                    throwable.printStackTrace();
                 }
 
                 @Override
