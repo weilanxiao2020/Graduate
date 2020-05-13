@@ -127,7 +127,7 @@ public class UserActivity extends AppCompatActivity {
                 Observable.timer(0,TimeUnit.MILLISECONDS)
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(s->{
-                            Toast.makeText(mContext, "请输入正确的工号或代码", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(mContext, "请输入正确的订单号", Toast.LENGTH_SHORT).show();
                         });
             }
         });

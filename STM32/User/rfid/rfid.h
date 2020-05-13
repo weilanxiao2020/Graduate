@@ -37,7 +37,7 @@ const static uint8_t Model_Address_Len = 15;
 typedef struct {
 	uint32_t 	cardId;		// 卡片类型
 	uint8_t 	cardType;	// RfidCard数据域，用户自定义
-	Model 		*pData;		// 用户数据
+	Model 		data;		// 用户数据
 }RfidType;
 
 typedef enum {
@@ -84,7 +84,7 @@ static uint8_t sUcType = DEFAULT_UCTYPE;
 
 /////////////////////////////////////////////////////////////////////
 void Rfid_Init(void);
-RfidType *Rfid_Read(uint8_t cardType);
+uint8_t Rfid_Read(RfidType *rfid, uint8_t cardType);
 uint8_t Rfid_Card_Get(void);
 void Rfid_Card_Set(uint8_t ucType);
 uint8_t Rfid_Find_Card(uint8_t* pId);
@@ -94,15 +94,15 @@ boolean Rfid_WR_Datas(uint8_t cardType, byte *pDatas, const CardMap *maps, uint8
 
 
 /*--------------------------------------------------*/
-RfidType *Rfid_Read_All(uint8_t cardType);
+uint8_t Rfid_Read_All(RfidType *rfid, uint8_t cardType);
 void Rfid_Write_All(const RfidType* pRfid);
-RfidType *Rfid_Read_TrackId_Address_Status(uint8_t cardType);
+uint8_t Rfid_Read_TrackId_Address_Status(RfidType *rfid, uint8_t cardType);
 void Rfid_Write_TrackId_Address_Status(const RfidType* pRfid);
 void Rfid_Write_Sender(const RfidType* pRfid);
 
 
 uint8_t Rfid_Write_TrackId_Mission_Address_Status(const RfidType* pRfid, uint8_t isWait);
-RfidType *Rfid_Read_TrackId_Mission_Address_Status(uint8_t cardType, uint8_t isWait);
+uint8_t Rfid_Read_TrackId_Mission_Address_Status(RfidType *rfid, uint8_t cardType, uint8_t isWait);
 
 /*--------------------------------------------------*/
 // 16字节转换成n字节

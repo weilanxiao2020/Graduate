@@ -28,58 +28,7 @@ PB12(SPI2_NSS)	7. CS OLED 的 CS#脚，也就是片选管脚
 //              CS   接PA4 PB->12 
 
 /* Oled GPIO*/
-//#define OLED
 
-#ifdef OLED
-//片选:PB12，即OLED模块的CS引脚，接STM32的SPI的NSS引脚
-#define OLED_GPIO_CS_CLK_FUN      	RCC_APB2PeriphClockCmd
-#define OLED_GPIO_CS_CLK        	RCC_APB2Periph_GPIOA
-#define OLED_GPIO_CS_PORT    	    GPIOA			   
-#define OLED_GPIO_CS_PIN		    GPIO_Pin_4
-#define OLED_GPIO_CS_MODE		    GPIO_Mode_Out_PP
-#define OLED_GPIO_CS_SPEED          GPIO_Speed_50MHz
-
-//时钟:PB13，即OLED模块的D0引脚,接STM32的SPI的SCK引脚
-#define OLED_GPIO_SCK_CLK_FUN       RCC_APB2PeriphClockCmd
-#define OLED_GPIO_SCK_CLK           RCC_APB2Periph_GPIOA
-#define OLED_GPIO_SCK_PORT    	    GPIOA			   
-#define OLED_GPIO_SCK_PIN		    GPIO_Pin_5
-#define OLED_GPIO_SCK_MODE		    GPIO_Mode_Out_PP
-#define OLED_GPIO_SCK_SPEED         GPIO_Speed_50MHz
-
-//数据输入:PB15，即OLED模块的D1引脚，接STM32的SPI的MOSI引脚
-#define OLED_GPIO_MOSI_CLK_FUN      RCC_APB2PeriphClockCmd
-#define OLED_GPIO_MOSI_CLK          RCC_APB2Periph_GPIOA
-#define OLED_GPIO_MOSI_PORT    	   	GPIOA			   
-#define OLED_GPIO_MOSI_PIN		    GPIO_Pin_7
-#define OLED_GPIO_MOSI_MODE		    GPIO_Mode_Out_PP
-#define OLED_GPIO_MOSI_SPEED        GPIO_Speed_50MHz
-
-//数据输出:PB14，即OLED模块的MISO引脚，接STM32的SPI的MISO引脚
-#define OLED_GPIO_MISO_CLK_FUN      RCC_APB2PeriphClockCmd
-#define OLED_GPIO_MISO_CLK          RCC_APB2Periph_GPIOB
-#define OLED_GPIO_MISO_PORT    	    GPIOB			   
-#define OLED_GPIO_MISO_PIN		    GPIO_Pin_14
-#define OLED_GPIO_MISO_MODE		    GPIO_Mode_IN_FLOATING
-#define OLED_GPIO_MISO_SPEED        GPIO_Speed_50MHz
-
-//数据:PB9，即OLED模块的DC引脚
-#define OLED_GPIO_DC_CLK_FUN      	RCC_APB2PeriphClockCmd
-#define OLED_GPIO_DC_CLK          	RCC_APB2Periph_GPIOB
-#define OLED_GPIO_DC_PORT    	    GPIOB			   
-#define OLED_GPIO_DC_PIN		    GPIO_Pin_1
-#define OLED_GPIO_DC_MODE   	    GPIO_Mode_Out_PP
-#define OLED_GPIO_DC_SPEED          GPIO_Speed_50MHz
-
-//复位:PB8，即OLED模块的RES引脚
-#define OLED_GPIO_RST_CLK_FUN      	RCC_APB2PeriphClockCmd
-#define OLED_GPIO_RST_CLK          	RCC_APB2Periph_GPIOB
-#define OLED_GPIO_RST_PORT    	    GPIOB			   
-#define OLED_GPIO_RST_PIN		    GPIO_Pin_0
-#define OLED_GPIO_RST_MODE		    GPIO_Mode_Out_PP
-#define OLED_GPIO_RST_SPEED         GPIO_Speed_50MHz
-
-#else
 
 //片选:PB12，即OLED模块的CS引脚，接STM32的SPI的NSS引脚
 #define OLED_GPIO_CS_CLK_FUN      	RCC_APB2PeriphClockCmd
@@ -113,37 +62,21 @@ PB12(SPI2_NSS)	7. CS OLED 的 CS#脚，也就是片选管脚
 #define OLED_GPIO_MISO_MODE		    GPIO_Mode_IN_FLOATING
 #define OLED_GPIO_MISO_SPEED        GPIO_Speed_50MHz
 
-//数据:PB9，即OLED模块的DC引脚
+//数据:PB14，即OLED模块的DC引脚
 #define OLED_GPIO_DC_CLK_FUN      	RCC_APB2PeriphClockCmd
 #define OLED_GPIO_DC_CLK          	RCC_APB2Periph_GPIOB
 #define OLED_GPIO_DC_PORT    	    GPIOB			   
-#define OLED_GPIO_DC_PIN		    GPIO_Pin_9
+#define OLED_GPIO_DC_PIN		    GPIO_Pin_14
 #define OLED_GPIO_DC_MODE   	    GPIO_Mode_Out_PP
 #define OLED_GPIO_DC_SPEED          GPIO_Speed_50MHz
 
-//复位:PB8，即OLED模块的RES引脚
+//复位:PA8，即OLED模块的RES引脚
 #define OLED_GPIO_RST_CLK_FUN      	RCC_APB2PeriphClockCmd
-#define OLED_GPIO_RST_CLK          	RCC_APB2Periph_GPIOB
-#define OLED_GPIO_RST_PORT    	    GPIOB			   
+#define OLED_GPIO_RST_CLK          	RCC_APB2Periph_GPIOA
+#define OLED_GPIO_RST_PORT    	    GPIOA			   
 #define OLED_GPIO_RST_PIN		    GPIO_Pin_8
 #define OLED_GPIO_RST_MODE		    GPIO_Mode_Out_PP
 #define OLED_GPIO_RST_SPEED         GPIO_Speed_50MHz
-
-#endif
-
-// Oled SPI
-#define OLED_SPI            SPI2
-#define OLED_SPI_CLK_FUN    RCC_APB1PeriphClockCmd
-#define OLED_SPI_CLK        RCC_APB1Periph_SPI2
-#define OLED_SPI_DIR        SPI_Direction_2Lines_FullDuplex
-#define OLED_SPI_MODE       SPI_Mode_Master
-#define OLED_SPI_DATA_SIZE  SPI_DataSize_8b
-#define OLED_SPI_CPOL       SPI_CPOL_High
-#define OLED_SPI_CPHA       SPI_CPHA_2Edge
-#define OLED_SPI_NSS        SPI_NSS_Soft
-#define OLED_SPI_BAURATE    SPI_BaudRatePrescaler_16
-#define OLED_SPI_FISRT_BIT  SPI_FirstBit_MSB
-#define OLED_SPI_CRC        7
 
 #define OLED_CS_On()	    OLED_CS_Clr()					
 #define OLED_CS_Off()       OLED_CS_Set()

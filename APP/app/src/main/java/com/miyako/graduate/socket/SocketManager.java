@@ -31,6 +31,10 @@ public class SocketManager {
 
     private static final String TAG = SocketManager.class.getSimpleName();
 
+    //连接参数设置(IP,端口号),这也是一个连接的唯一标识,不同连接,该参数中的两个值至少有其一不一样
+//    private String serverIp = "123.57.243.5";
+    private String serverIp = "192.168.1.108";
+
     private static final class Obj {
         private static final SocketManager obj = new SocketManager();
     }
@@ -52,10 +56,6 @@ public class SocketManager {
         return this;
     }
 
-    private IConnectionManager mManager;
-    //连接参数设置(IP,端口号),这也是一个连接的唯一标识,不同连接,该参数中的两个值至少有其一不一样
-    private String serverIp = "123.57.243.5";
-    //    private String serverIp = "192.168.1.108";
     private ConnectionInfo info = new ConnectionInfo(serverIp, 12345);
 
     private SparseArray<ISocketCall> callMap = new SparseArray<ISocketCall>();
@@ -77,9 +77,9 @@ public class SocketManager {
 
     public void initSocket() {
         //调用OkSocket,开启这次连接的通道,拿到通道Manager
-        mManager = OkSocket.open(info);
+        IConnectionManager manager = OkSocket.open(info);
         //注册Socket行为监听器,SocketActionAdapter是回调的Simple类,其他回调方法请参阅类文档
-        mManager.registerReceiver(new SocketActionAdapter(){
+        manager.registerReceiver(new SocketActionAdapter(){
             @Override
             public void onSocketConnectionSuccess(ConnectionInfo info, String action) {
                 //                Toast.makeText(this, "连接成功", Toast.LENGTH_SHORT).show();
@@ -128,7 +128,7 @@ public class SocketManager {
             }
         });
         //调用通道进行连接
-        mManager.connect();
+        manager.connect();
         //设置自定义解析头
         OkSocketOptions mOkOptions = OkSocketOptions.getDefault();
         OkSocketOptions.Builder okOptionsBuilder = new OkSocketOptions.Builder(mOkOptions);
@@ -152,7 +152,7 @@ public class SocketManager {
             }
         });
         //将新的修改后的参配设置给连接管理器
-        mManager.option(okOptionsBuilder.build());
+        manager.option(okOptionsBuilder.build());
     }
 
     /**
@@ -226,19 +226,42 @@ public class SocketManager {
 
     /**
      * 获取指定order的所有Gps
-     * @param orderId 唯一order标识，通过mission
+     * @param missionId 唯一order标识，通过mission
      * @param socketCall 返回结果回调
      */
-    public void getOrderGps(String orderId, ISocketCall socketCall) {
+    public void getOrderGpsAll(String missionId, ISocketCall socketCall) {
         OkSocket.open(info)
                 .send(new ISendable() {
                     @Override
                     public byte[] parse() {
                         addCallMap(Constants.CMD_GPS, socketCall);
-                        ReqBody<QueryMsg> reqBody = new ReqBody<>(Constants.CMD_GPS<<8, System.currentTimeMillis(), "Android");
+                        ReqBody<QueryMsg> reqBody = new ReqBody<>(Constants.CMD_GPS_READ, System.currentTimeMillis(), "Android");
                         Gson gson = new Gson();
                         QueryMsg msg = new QueryMsg();
-                        msg.setQueryId(orderId);
+                        msg.setQueryId(missionId);
+                        reqBody.setData(Collections.singletonList(msg));
+                        String json = gson.toJson(reqBody);
+                        Log.d(TAG, "send data json:"+json);
+                        return json.getBytes();
+                    }
+                });
+    }
+
+    /**
+     * 获取指定order的Gps，相同region只返回最新的一个
+     * @param missionId 唯一order标识，通过mission
+     * @param socketCall 返回结果回调
+     */
+    public void getOrderGpsRegion(String missionId, ISocketCall socketCall) {
+        OkSocket.open(info)
+                .send(new ISendable() {
+                    @Override
+                    public byte[] parse() {
+                        addCallMap(Constants.CMD_GPS, socketCall);
+                        ReqBody<QueryMsg> reqBody = new ReqBody<>(Constants.CMD_GPS_REGION_LAST, System.currentTimeMillis(), "Android");
+                        Gson gson = new Gson();
+                        QueryMsg msg = new QueryMsg();
+                        msg.setQueryId(missionId);
                         reqBody.setData(Collections.singletonList(msg));
                         String json = gson.toJson(reqBody);
                         Log.d(TAG, "send data json:"+json);
@@ -258,7 +281,7 @@ public class SocketManager {
                     @Override
                     public byte[] parse() {
                         addCallMap(Constants.CMD_GPS, socketCall);
-                        ReqBody<QueryMsg> reqBody = new ReqBody<>(Constants.CMD_GPS<<8|0x02, System.currentTimeMillis(), "Android");
+                        ReqBody<QueryMsg> reqBody = new ReqBody<>(Constants.CMD_GPS_LAST, System.currentTimeMillis(), "Android");
                         Gson gson = new Gson();
                         QueryMsg msg = new QueryMsg();
                         msg.setQueryId(orderId);

@@ -69,7 +69,7 @@ void Rfid_Spi_Init(void)
 
 static void Rfid_delay()
 {
-	delay_us(200);
+	delay_us(20);
 }
 
 // 条件编译，如果有硬件SPI且启用
@@ -88,7 +88,10 @@ void Rfid_Write_Byte(byte data)
 }
 
 #else
-
+		// ???? ????
+		// 1000 0000
+		// 		   &
+		// ?000 0000
  /**
   * @brief  向RC522发送1 Byte 数据
   * @param  data，要发送的数据
@@ -100,25 +103,15 @@ void Rfid_Write_Byte(byte data)
 
 	for(cnt=0;cnt<8;cnt++)
 	{     
-		// ???? ????
-		// 1000 0000
-		// 		   &
-		// ?000 0000
-		if (data&0x80)
-		  RFID_MOSI_Set();
-		else 
-		  RFID_MOSI_Clr();
+		if (data&0x80) RFID_MOSI_Set();
+		else RFID_MOSI_Clr();
 
-		// 延时，时钟清零
 		Rfid_delay();
 		RFID_SCK_Clr();
-
-		// 延时，时钟开始
 		Rfid_delay();
 		RFID_SCK_Set();
-
-		// 延时
 		Rfid_delay();
+
 		data <<= 1; 
 	} 	
 	// Tips_Glint(1,100);
@@ -139,14 +132,11 @@ byte Rfid_Read_Byte(void)
 	{
 		SPI_Data <<= 1;
 		RFID_SCK_Clr();
-
 		Rfid_delay();
-		if ( RFID_MISO_GET() == 1)
-			SPI_Data |= 0x01;
-
+		
+		if ( RFID_MISO_GET() == 1) SPI_Data |= 0x01;
 		Rfid_delay();
 		RFID_SCK_Set();
-
 		Rfid_delay();
 	}
 	

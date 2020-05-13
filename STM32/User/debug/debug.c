@@ -149,11 +149,14 @@ void USART1_IRQHandler(void)
 void logI(const char *type, const char *func, const char *file, const char *format, ...)
 {
 #ifdef GZ_DEBUG
-    va_list ap;
+    va_list ap;    
+    uint64_t tim;
     va_start(ap, format);
     Buf_Clear((byte *)Debug_Receive_Buf, Debug_Buf_Length);
     vsnprintf(Debug_Receive_Buf, sizeof(Debug_Receive_Buf), format, ap);
     va_end(ap);
+    // tim = Tim2_Time_Stamp();
+    // printf("[%ld] ", tim);
     printf("[%s:Info] [%s]=> %s\r\n", type, func, Debug_Receive_Buf);
 #endif
 }
@@ -162,10 +165,13 @@ void logE(const char *type, const char *func, const char *file, const char *form
 {
 #ifdef GZ_DEBUG
     va_list ap;
+    uint64_t tim;
     va_start(ap, format);
     Buf_Clear((byte *)Debug_Receive_Buf, Debug_Buf_Length);
     vsnprintf(Debug_Receive_Buf, sizeof(Debug_Receive_Buf), format, ap);
     va_end(ap);
+    // tim = Tim2_Time_Stamp();
+    // printf("[%ld]", tim);
     printf("[%s:Error] [%s]=> %s\r\n", type, func, Debug_Receive_Buf);
 #endif
 }

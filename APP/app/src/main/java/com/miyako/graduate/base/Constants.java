@@ -43,5 +43,7 @@ public class Constants {
     public static final int CMD_MISSION = 0xf1;
     public static final int CMD_ORDER = 0xf2;
     public static final int CMD_GPS = 0xf3;
-    public static final int CMD_GPS_LAST = 0xf3;
+    public static final int CMD_GPS_READ = (CMD_GPS << 8);
+    public static final int CMD_GPS_LAST = (CMD_GPS << 8) | 0x02;
+    public static final int CMD_GPS_REGION_LAST = (CMD_GPS << 8) | 0x03;
 }

@@ -12,6 +12,7 @@
 
 void Gps_Init(void);
 void Gps_Data_Get(void);
+GpsData* Gps_Data_Buf(void);
 void Gps_Data_Parse(void);
 void Gps_Data_Print(void);
 #endif

@@ -1,6 +1,8 @@
 package com.miyako;
 
+import com.miyako.dao.GPSDao;
 import com.miyako.dao.MissionDao;
+import com.miyako.dao.OrderDao;
 import com.miyako.model.Mission;
 import com.miyako.mqtt.MqttManager;
 import com.miyako.mqtt.MqttTask;
@@ -9,9 +11,12 @@ import com.miyako.socket.MySocket;
 import com.miyako.utils.LogUtil;
 import com.miyako.utils.ServerApp;
 import com.miyako.utils.VerifyUtil;
+import io.reactivex.Observable;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
 
@@ -19,14 +24,17 @@ public class Main {
 
     public static void main(String[] args) {
 	// write your code here
-        LogUtil.DEBUG = true;
+    //    LogUtil.DEBUG = true;
+        LogUtil.init(true);
         try {
             ServerApp.readConfig();
             VerifyUtil.init();
-            //if (VerifyUtil.verfiyRegion(320105)) {
-            //    LogUtil.d(TAG, "校验成功");
-            //}else{
+            //String region = VerifyUtil.verfiyRegion(320105);
+            //if (region.isEmpty()) {
             //    LogUtil.d(TAG, "校验失败");
+            //}else{
+            //    LogUtil.d(TAG, "校验成功");
+            //    LogUtil.d(TAG, region);
             //}
         }
         catch (IOException e) {
@@ -38,8 +46,35 @@ public class Main {
         new MySocket(12345).start(); // 监听指定端口
         new MqttTask().start();
         LogUtil.d(TAG, "server is running...");
-        //LogUtil.d(TAG, "findByAllMission");
-        //List<Mission> list = MissionDao.findAll();
-        //list.forEach(s -> LogUtil.d(TAG, s.toString()));
+
+        //testMySql();
+    }
+
+    private static void testMySql() {
+        try {
+            Thread.sleep(5000);
+        }
+        catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        for (int i = 0; i < 100; i++) {
+            new Thread(new Runnable(){
+                @Override
+                public void run(){
+                    long start = System.currentTimeMillis();
+                    Random random = new Random(start);
+                    int fi = random.nextInt();
+                    switch (fi % 6) {
+                        case 0: MissionDao.findByCard("12345678-416421");break;
+                        case 1: OrderDao.findByMissionId("12345678-416421");break;
+                        case 2: GPSDao.findByMissionId("12345678-416421");break;
+                        case 3: GPSDao.findByMissionIdLast("12345678-416421");break;
+                        case 4: GPSDao.findByMissionIdRegion("12345678-416421");break;
+                    }
+                    long end = System.currentTimeMillis();
+                    System.out.println(String.format("T:%s test total time: %sms", Thread.currentThread().getName(), end-start));
+                }
+            }, "mysql-test"+i).start();
+        }
     }
 }

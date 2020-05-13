@@ -10,34 +10,38 @@ void Mqtt_Init()
 		_task.mqtt_s = 0x01;
 		return;
     }
+	_task.mqtt_s = 0xf0;
     if(Gprs_Restart()==false)
     {
         Debug_Info(Mqtt_TAG, "restart error");
-		_task.mqtt_s = 0x0f;
+		_task.mqtt_s = 0xf1;
 		return;
     }
 	Debug_Info(Mqtt_TAG, "restart");
+	_task.mqtt_s =  0xe0;
 	delay_ms(1000);
     if(Gprs_Ok()==false)
     {
 		Debug_Info(Mqtt_TAG, "sim error");
-		_task.mqtt_s = 0x02;
+		_task.mqtt_s = 0xe1;
 		return;
     }
 	Debug_Info(Mqtt_TAG, "sim ready");
+	_task.mqtt_s = 0xd0;
 	delay_ms(1000);
     if(Gprs_Wait_Net()==false)
     {
 		Debug_Info(Mqtt_TAG, "net error");
-		_task.mqtt_s = 0x03;
+		_task.mqtt_s = 0xd1;
 		return;
     }
 	Debug_Info(Mqtt_TAG, "net ready");
+	_task.mqtt_s = 0xc0;
 	delay_ms(1000);
     if(Mqtt_Status()==false)
     {
 		Debug_Info(Mqtt_TAG, "connect mqtt error");
-		_task.mqtt_s = 0x04;
+		_task.mqtt_s = 0xc1;
 		return;
     }
 	Debug_Info(Mqtt_TAG, "mqtt ready");
@@ -66,11 +70,13 @@ boolean Mqtt_Publish(const char *topic, const char *data, uint16_t len, uint8_t 
     boolean flag;
 	uint8_t cnt=0;
 	char *str = NULL;
-	if(Mqtt_Status()==false)
-    {
-		Debug_Info(Mqtt_TAG, "connect mqtt error");
-		_task.mqtt_s = 0x04;
-		return false;
+	// printf("%s",data);
+	if(_task.mqtt_s != 0x01) {
+		if(Mqtt_Status()==false) {
+			Debug_Info(Mqtt_TAG, "connect mqtt error");
+			_task.mqtt_s = 0x04;
+			return false;
+		}
     }
 	Gprs_Clear_Buffer();
 	Debug_Info(Mqtt_TAG, "wait mqtt publish");
@@ -79,7 +85,8 @@ boolean Mqtt_Publish(const char *topic, const char *data, uint16_t len, uint8_t 
 	Debug_Info(Mqtt_TAG, str);
 	flag = Gprs_Write_AT_Cmd(str, ">",1,1500);
 	if(flag) {
-		flag = Gprs_Write_AT_Cmd(data, "Publish OK",1,5000);
+		Debug_Info(Mqtt_TAG, "publish");
+		flag = Gprs_Write_AT_Cmd(data, "Publish OK",1,2500);
 		if(flag) {
 			Debug_Info(Mqtt_TAG, "publish ok");
 		}else{

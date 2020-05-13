@@ -114,7 +114,6 @@ void USART2_IRQHandler(void)
 {
 	uint8_t res=0;
 	res = Usart_GetByte(GPRS_USART);
-	// printf("%02x", res);
 	Gprs_Buffer[bufferHead] = res;  	  //将接收到的字符串存到缓存中
 	bufferHead++;                	  //缓存指针向后移动
 	if(bufferHead >= Buffer_Max)       	  //如果缓存满,将缓存指针指向缓存的首地址

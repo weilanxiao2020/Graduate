@@ -13,6 +13,7 @@ import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.CameraUpdateFactory;
+import com.amap.api.maps.CoordinateConverter;
 import com.amap.api.maps.UiSettings;
 import com.amap.api.maps.model.BitmapDescriptor;
 import com.amap.api.maps.model.BitmapDescriptorFactory;
@@ -22,6 +23,7 @@ import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.MyLocationStyle;
 import com.amap.api.maps.model.PolylineOptions;
 import com.miyako.graduate.R;
+import com.miyako.graduate.entity.GpsOrder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,18 +50,38 @@ public class MapUtil {
     private boolean flag;
     private int colorLine;
     private List<LatLng> mData;
-    private MapLocationListener mListener;
     private boolean isDraw;
 
     private static double cnt = 0;
 
     private LatLng lastPoint;
 
+    private ILocationListener mListener;
+
+    public interface ILocationListener {
+        void getLocation(LatLng latLng);
+    }
+
+    private CoordinateConverter converter;
+
+    private CoordinateConverter getConvert() {
+        if (converter == null) {
+            converter = new CoordinateConverter(mContext);
+            converter.from(CoordinateConverter.CoordType.GPS);
+        }
+        return converter;
+    }
+
+    public LatLng convert(LatLng source) {
+        // 执行转换操作
+        return getConvert().coord(source).convert();
+    }
+
     private AMapLocationListener mLocationListener = new AMapLocationListener() {
         @Override
         public void onLocationChanged(AMapLocation amapLocation) {
             // 从这里开始就会持续回调
-            if (checkGps()&&!isDraw) {
+            if (checkGps()) {
                 if (amapLocation != null) {
                     if (amapLocation.getErrorCode() == 0) {
                         //定位成功回调信息，设置相关消息
@@ -71,18 +93,18 @@ public class MapUtil {
                         if(lastPoint == null) {
                             lastPoint = new LatLng(currentLat, currentLon);
                         }
-                        LatLng newPoint = new LatLng(currentLat+(cnt), currentLon+(cnt));
-                        cnt = cnt+0.02;
-                        Log.d(TAG, "cnt "+cnt);
-                        mMap.addPolyline(new PolylineOptions().add(lastPoint, newPoint).width(10).color(colorLine));
-                        lastPoint = newPoint;
+//                        cnt = cnt+0.02;
+//                        Log.d(TAG, "cnt "+cnt);
+//                        mMap.addPolyline(new PolylineOptions().add(lastPoint, newPoint).width(10).color(colorLine));
+                        lastPoint = currentLatLng;
                         Log.i("mylocation", "currentLat : " + currentLat + " currentLon : " + currentLon);
-                        if (flag) {
-                            // 将当前位置移至屏幕中心 设置了flag并且设置了上面的定位模式 这里就只一次
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 17));
-                            mMap.addPolyline(new PolylineOptions().addAll(mData).width(10).color(colorLine));
-                            flag = false;
-                        }
+                        mListener.getLocation(lastPoint);
+//                        if (flag) {
+//                            // 将当前位置移至屏幕中心 设置了flag并且设置了上面的定位模式 这里就只一次
+//                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 17));
+//                            mMap.addPolyline(new PolylineOptions().addAll(mData).width(10).color(colorLine));
+//                            flag = false;
+//                        }
                     } else {
                         //显示错误信息ErrCode是错误码，errInfo是错误信息，详见错误码表。
                         Log.e("AmapError", "location error, ErrCode:"
@@ -107,6 +129,11 @@ public class MapUtil {
 
     public MapUtil setContext(Context context) {
         mContext = context;
+        return this;
+    }
+
+    public MapUtil setLocationListener(ILocationListener listener) {
+        mListener = listener;
         return this;
     }
 
@@ -159,10 +186,6 @@ public class MapUtil {
         return this;
     }
 
-    public interface MapLocationListener {
-        public void locationChanged();
-    }
-
     /**
      * 当前位置显示样式
      */
@@ -200,21 +223,18 @@ public class MapUtil {
         return this;
     }
 
-    public static void convert() {
-
-    }
-
     // 设置绘制坐标点
     public MapUtil setDatas(List<LatLng> data) {
         if (mData == null) {
             mData = new ArrayList<>(data.size());
-            convert();
             mData.addAll(data);
+            Log.d(TAG, "data size:"+mData.size());
         } else {
-//            mData.clear();
+            mData.clear();
+            mData = null;
             mData = new ArrayList<>(data.size());
-            convert();
             mData.addAll(data);
+            Log.d(TAG, "data size:"+mData.size());
         }
         return this;
     }
@@ -226,14 +246,17 @@ public class MapUtil {
 
     public MapUtil drawPath() {
         Log.d(TAG, "绘制移动路线");
+        Log.d(TAG, "draw size:"+mData.size());
         isDraw = true;
         //绘制移动路线
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mData.get(0), 17));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mData.get(mData.size()-1), 10));
         for(int i=0;i<mData.size();i++) {
             Log.d(TAG, mData.get(i).toString());
         }
+        mMap.clear();
         mMap.addPolyline(new PolylineOptions().addAll(mData).width(10).color(colorLine));
 //        mMap.addPolyline(new PolylineOptions().add(mData.get(mData.size()-1), new LatLng(30.3133573552,120.3590002317)).width(10).color(colorLine));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mData.get(mData.size()-1), 10));
         return this;
     }
 
@@ -242,6 +265,7 @@ public class MapUtil {
         isDraw = true;
         //绘制移动路线
         mMap.addPolyline(new PolylineOptions().add(point).width(10).color(colorLine));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mData.get(mData.size()-1), 10));
         return this;
     }
 

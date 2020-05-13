@@ -114,7 +114,7 @@ void Oled_Write_Byte(uint8_t data)
 //向SSD1106写入一个字节。
 //dat:要写入的数据/命令
 //cmd:数据/命令标志 0,表示命令;1,表示数据;
-void Oled_WR_Byte(byte data, uint8_t cmd)
+void Oled_WR_Byte(uint8_t data, uint8_t cmd)
 {	
 	uint8_t i;			  
 	if(cmd)

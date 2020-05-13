@@ -14,7 +14,7 @@ import java.util.Date;
 public class LogUtil {
 
     //private static Logger logger;
-    private static Logger logger = Logger.getLogger(LogUtil.class);
+    private static Logger logger;
 
     public static boolean DEBUG = false;
 
@@ -23,9 +23,18 @@ public class LogUtil {
     private static String Wraning = "Warning";
     private static String Error = "Error";
 
+    public static void init(boolean flag) {
+        if (flag) {
+            DEBUG = true;
+            logger = Logger.getLogger(LogUtil.class);
+        }
+    }
+
     private static void print(String level, String tag, String msg) {
-        String name = Thread.currentThread().getName();
-        System.out.println(String.format("%s [%s] %s=>/ %s: %s", getTime(), name.length()>32?name.substring(0,32)+"...":name, level, tag, msg));
+        if (DEBUG) {
+            String name = Thread.currentThread().getName();
+            System.out.println(String.format("%s [%s] %s=>/ %s: %s", getTime(), name.length()>32?name.substring(0,32)+"...":name, level, tag, msg));
+        }
     }
 
     private static String format(String tag, String msg) {

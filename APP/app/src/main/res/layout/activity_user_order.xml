@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -26,34 +25,33 @@
             android:layout_weight="1"
             android:orientation="vertical">
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/tv_title_order_id"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-                <TextView
-                    android:id="@+id/tv_title_order_id"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/tv_user_order"
-                    android:textSize="17sp"/>
-            </LinearLayout>
+                android:layout_height="0dp"
+                android:layout_weight="2"
+                android:gravity="center_vertical"
+                android:text="@string/tv_user_order"
+                android:textSize="17sp"/>
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/tv_title_order_receiver"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:layout_height="0dp"
+                android:layout_weight="2"
+                android:gravity="center_vertical"
+                android:text="@string/tv_user_receiver"
+                android:textSize="17sp"/>
 
-                <TextView
-                    android:id="@+id/tv_title_order_code"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/tv_user_receiver"
-                    android:textSize="17sp"/>
-            </LinearLayout>
+            <TextView
+                android:id="@+id/tv_title_order_distance"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center_vertical|right"
+                android:layout_marginRight="5dp"
+                android:text="@string/tv_user_order_distance"
+                android:textSize="10sp"/>
         </LinearLayout>
 
         <LinearLayout

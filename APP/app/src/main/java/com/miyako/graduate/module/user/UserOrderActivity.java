@@ -7,6 +7,8 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.amap.api.maps.AMapUtils;
+import com.amap.api.maps.CoordinateConverter;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.model.LatLng;
 import com.miyako.graduate.R;
@@ -15,16 +17,18 @@ import com.miyako.graduate.entity.GpsOrder;
 import com.miyako.graduate.socket.SocketManager;
 import com.miyako.graduate.socket.msg.BaseMsg;
 import com.miyako.graduate.socket.msg.GpsMsg;
-import com.miyako.graduate.socket.msg.OrderMsg;
 import com.miyako.graduate.utils.MapUtil;
 
-import java.net.Socket;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.internal.schedulers.IoScheduler;
+import io.reactivex.schedulers.Schedulers;
 
 public class UserOrderActivity extends AppCompatActivity {
 
@@ -33,6 +37,7 @@ public class UserOrderActivity extends AppCompatActivity {
 
     private TextView mTvOrderId;
     private TextView mTvOrderReceiver;
+    private TextView mTvOrderDistance;
     private MapView mMapView;
     private ListView mListOrderGps;
 
@@ -40,7 +45,9 @@ public class UserOrderActivity extends AppCompatActivity {
     private String receiver;
     private String mission;
     private UserOrderAdapter mAdapter;
-    private List<LatLng> points;
+    // 绘制点
+    private LinkedList<LatLng> points;
+    private LinkedList<LatLng> showDatas;
 
     private boolean flag;
 
@@ -50,6 +57,12 @@ public class UserOrderActivity extends AppCompatActivity {
         setContentView(R.layout.activity_user_order);
         initView(savedInstanceState);
         initValue();
+        MapUtil.getInstance()
+                .setContext(this)
+                .init(mMapView.getMap())
+                .location()
+                .setLocationListener(this::getLocation)
+                .changedLocation(true);
     }
 
     @Override
@@ -64,8 +77,9 @@ public class UserOrderActivity extends AppCompatActivity {
         super.onResume();
         //在activity执行onResume时执行mMapView.onResume ()，重新绘制加载地图
         mMapView.onResume();
-        showList(null);
         getGpsLast();
+        showList(null);
+
     }
     @Override
     protected void onPause() {
@@ -85,7 +99,8 @@ public class UserOrderActivity extends AppCompatActivity {
     private void initView(Bundle savedInstanceState) {
         Log.d(TAG, "init view");
         mTvOrderId = findViewById(R.id.tv_title_order_id);
-        mTvOrderReceiver = findViewById(R.id.tv_title_order_code);
+        mTvOrderReceiver = findViewById(R.id.tv_title_order_receiver);
+        mTvOrderDistance = findViewById(R.id.tv_title_order_distance);
         mMapView = findViewById(R.id.map_order_record);
         mListOrderGps = findViewById(R.id.lv_order_record);
         mMapView.onCreate(savedInstanceState);
@@ -93,8 +108,6 @@ public class UserOrderActivity extends AppCompatActivity {
         mAdapter = new UserOrderAdapter(this, new ArrayList<>());
         mListOrderGps.setAdapter(mAdapter);
     }
-
-
 
     private void initValue() {
         orderId = getIntent().getStringExtra(Constants.KEY_ORDER_ID);
@@ -110,9 +123,6 @@ public class UserOrderActivity extends AppCompatActivity {
         if (mMapView.getVisibility() == View.VISIBLE) {
             Log.d(TAG, "display map");
             MapUtil.getInstance()
-                    .setContext(this)
-                    .init(mMapView.getMap())
-                    .location()
                     .display();
         }
     }
@@ -127,13 +137,15 @@ public class UserOrderActivity extends AppCompatActivity {
     private void stopMap() {
         mMapView.setVisibility(View.GONE);
         mListOrderGps.setVisibility(View.VISIBLE);
-        MapUtil.getInstance().changedLocation(false);
+//        MapUtil.getInstance().changedLocation(false);
+        isShow = false;
     }
 
     int inter = 10;
 
     private void getGpsLast() {
-        Observable.interval(inter, TimeUnit.SECONDS)
+        Observable.interval(0, inter, TimeUnit.SECONDS)
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(s->{
                     if (flag) {
@@ -142,22 +154,27 @@ public class UserOrderActivity extends AppCompatActivity {
                                     @Override
                                     public void success(List<BaseMsg> msg) {
                                         Log.d(TAG, "msg: " + msg.get(0));
-                                        Observable.timer(0, TimeUnit.MILLISECONDS)
-                                                .observeOn(AndroidSchedulers.mainThread())
-                                                .subscribe(s -> {
-                                                    GpsMsg last = (GpsMsg) msg.get(0);
-                                                    GpsOrder order = convert(last);
-                                                    long utcTime = mAdapter.getItem(mAdapter.getCount()-1).getUtcTime();
-                                                    Log.d(TAG, "last:"+utcTime);
-                                                    Log.d(TAG, "new:"+order.getUtcTime());
-                                                    if (order.getUtcTime()>utcTime) {
-                                                        LatLng latLng = convertLatLng(order);
-                                                        points.add(latLng);
-                                                        mAdapter.update(order);
+                                        GpsMsg last = (GpsMsg) msg.get(0);
+                                        GpsOrder order = convert(last);
+                                        long utcTime = mAdapter.getItem(0).getUtcTime();
+                                        Log.d(TAG, "上次gps时间:"+utcTime);
+                                        Log.d(TAG, "本次gps时间:"+order.getUtcTime());
+                                        LatLng latLng = convertLatLng(order);
+                                        mLastLatLng = latLng;
+                                        if (order.getUtcTime() > utcTime) {
+                                            showDatas.addFirst(latLng);
+                                            mAdapter.update(order);
+                                            if (mMapView.getVisibility() == View.VISIBLE) {
+                                                points.addLast(latLng);
+                                                runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
                                                         MapUtil.getInstance().drawPath(latLng);
                                                     }
-                                                    flag = true;
                                                 });
+                                            }
+                                        }
+                                        flag = true;
                                     }
 
                                     @Override
@@ -169,8 +186,31 @@ public class UserOrderActivity extends AppCompatActivity {
                 });
     }
 
+    private LatLng mLastLatLng;
+
+    private void showDistance(double distance) {
+        String format = String.format(distance > 1000.0 ? "%.2fkm" : "%.0fm", distance > 1000.0 ? distance / 1000:distance);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mTvOrderDistance.setText(getString(R.string.tv_user_order_distance, format));
+            }
+        });
+    }
+
+    // 定位回调
+    public void getLocation(LatLng latLng) {
+        Log.d(TAG, "getLocation:"+latLng);
+        Log.d(TAG, "lastLocation:"+mLastLatLng);
+        float distance = AMapUtils.calculateLineDistance(latLng, mLastLatLng);
+        Log.d(TAG, "直线距离:"+distance);
+        showDistance(distance);
+    }
+
     private LatLng convertLatLng(GpsOrder order) {
-        return new LatLng(Double.valueOf(order.getLatitude()), Double.valueOf(order.getLongitude()));
+        LatLng source = new LatLng(Double.valueOf(order.getLatitude()), Double.valueOf(order.getLongitude()));
+        // 执行转换操作
+        return MapUtil.getInstance().convert(source);
     }
 
     private GpsOrder convert(GpsMsg gpsMsg) {
@@ -189,43 +229,88 @@ public class UserOrderActivity extends AppCompatActivity {
     public void showList(View view) {
         Log.d(TAG, "show list");
         stopMap();
-        SocketManager.getInstance().getOrderGps(mission, new SocketManager.ISocketCall() {
-            @Override
-            public void success(List<BaseMsg> msg) {
-                Log.d(TAG, "msg: "+msg.get(0));
-                Observable.timer(0, TimeUnit.MILLISECONDS)
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(s->{
-//                            int size = msg.size()-1;
+        Observable.timer(0, TimeUnit.MILLISECONDS)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(s->{
+                    SocketManager.getInstance().getOrderGpsRegion(mission, new SocketManager.ISocketCall() {
+                        @Override
+                        public void success(List<BaseMsg> msg) {
+                            Log.d(TAG, "msg: "+msg.get(0));
                             int size = msg.size();
                             List<GpsOrder> orderList = new ArrayList<>(size);
-                            if (points == null) {
-                                points = new ArrayList<>(size);
+                            if (showDatas == null) {
+                                showDatas = new LinkedList<>();
                             }
                             for(int i=0;i<size;i++) {
                                 GpsMsg gpsMsg = (GpsMsg) msg.get(i);
                                 GpsOrder order = convert(gpsMsg);
                                 orderList.add(order);
-                                points.add(convertLatLng(order));
+                                // 添加到头部
+                                showDatas.addFirst(convertLatLng(order));
                             }
-                            mAdapter.update(orderList);
-                            mListOrderGps.setVisibility(View.VISIBLE);
-                            flag = true;
-                        });
-            }
+                            Observable.timer(0, TimeUnit.MILLISECONDS)
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe(s->{
+                                        mAdapter.update(orderList);
+                                        mListOrderGps.setVisibility(View.VISIBLE);
+                                        flag = true;
+                                    });
+                        }
 
-            @Override
-            public void error(int errorCode, List<BaseMsg> msg) {
+                        @Override
+                        public void error(int errorCode, List<BaseMsg> msg) {
 
-            }
-        });
+                        }
+                    });
+                });
+
     }
+
+    private boolean isShow = false;
 
     public void showMap(View view) {
         Log.d(TAG, "show map");
+        if(isShow) {
+            return;
+        }
+        Observable.timer(0, TimeUnit.MILLISECONDS)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(s->{
+                    SocketManager.getInstance().getOrderGpsAll(mission, new SocketManager.ISocketCall() {
+                        @Override
+                        public void success(List<BaseMsg> msg) {
+                            Log.d(TAG, "msg: "+msg.get(0));
+                            int size = msg.size();
+                            List<GpsOrder> orderList = new ArrayList<>(size);
+                            points = null;
+                            points = new LinkedList<>();
+                            for(int i=0;i<size;i++) {
+                                GpsMsg gpsMsg = (GpsMsg) msg.get(i);
+                                GpsOrder order = convert(gpsMsg);
+                                orderList.add(order);
+                                // 添加到尾部
+                                points.addLast(convertLatLng(order));
+                            }
+                            mListOrderGps.setVisibility(View.GONE);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    MapUtil.getInstance()
+                                            .setDatas(points)
+                                            .drawPath();
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void error(int errorCode, List<BaseMsg> msg) {
+
+                        }
+                    });
+                });
         startMap();
-        MapUtil.getInstance()
-                .setDatas(points)
-                .drawPath();
+        isShow = true;
     }
 }

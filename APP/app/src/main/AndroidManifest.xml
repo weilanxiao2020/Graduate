@@ -33,11 +33,11 @@
         <activity android:name=".module.staff.StaffLoginActivity"/>
         <activity android:name=".module.staff.StaffManagerActivity"/>
 
-<!--        <meta-data-->
-<!--            android:name="com.amap.api.v2.apikey"-->
-<!--            android:value="6e3f21cbe092880950b5f65f89e751b7" />-->
-<!--        &lt;!&ndash;高德service&ndash;&gt;-->
-<!--        <service android:name="com.amap.api.location.APSService" />-->
+        <meta-data
+            android:name="com.amap.api.v2.apikey"
+            android:value="6e3f21cbe092880950b5f65f89e751b7" />
+        <!--高德service-->
+        <service android:name="com.amap.api.location.APSService" />
     </application>
 
 </manifest>

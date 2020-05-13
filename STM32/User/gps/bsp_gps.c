@@ -105,7 +105,6 @@ void USART3_IRQHandler(void)
 					memcpy(ptrGpsData->GPS_Buffer, Gps_Rx_Buf, point1); 	//保存数据
 					ptrGpsData->isGetData = true;
 					point1 = 0;
-					// printf("[==%s==]\r\n", ptrGpsData->GPS_Buffer);
 					memset(Gps_Rx_Buf, 0, Gps_Rx_Length);      //清空	
 				}
             }	

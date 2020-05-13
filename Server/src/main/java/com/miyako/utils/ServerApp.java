@@ -66,6 +66,7 @@ public class ServerApp{
     public static final int CMD_GPS_READ = (CMD_GPS << 8);
     public static final int CMD_GPS_WRITE = (CMD_GPS << 8) | 0x01;
     public static final int CMD_GPS_LAST = (CMD_GPS << 8) | 0x02;
+    public static final int CMD_GPS_REGION_LAST = (CMD_GPS << 8) | 0x03;
 
     public static final String RESPONSE_SUCCESS = "[SUCCESS]";
     public static final String RESPONSE_ERROR = "[ERROR]";

@@ -11,6 +11,8 @@
 #endif
 
 void Tim2_1ms_Init(void);
+uint64_t Tim2_Time_Stamp(void);
+uint64_t Tim2_1s_Cnt(void);
 void Tim2_NVIC(void);
 void Tim2_Start(void);
 void TIM2_IRQHandler(void);

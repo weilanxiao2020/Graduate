@@ -8,7 +8,7 @@ void Tim2_Start(void)
     _1ms_cnt=0;
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2 , ENABLE);
     TIM_Cmd(TIM2, ENABLE);
-    Debug_Info(Bsp_Tim_TAG, "tim2 1ms start");
+    // Debug_Info(Bsp_Tim_TAG, "tim2 1ms start");
 }
 
 
@@ -26,7 +26,7 @@ void Tim2_1ms_Init(void)
     TIM_ITConfig(TIM2,TIM_IT_Update,ENABLE);// 开启中断标志 
     TIM_Cmd(TIM2, ENABLE);	// 开启时钟    
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2 , DISABLE);	//先关闭等待使用 
-    Debug_Info(Bsp_Tim_TAG, "tim2 1ms init"); 
+    // Debug_Info(Bsp_Tim_TAG, "tim2 1ms init"); 
 }
 
 void Tim2_NVIC(void)
@@ -39,10 +39,23 @@ void Tim2_NVIC(void)
     nvicInit.NVIC_IRQChannelSubPriority = 3;	
     nvicInit.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&nvicInit);
-    Debug_Info(Bsp_Tim_TAG, "tim2 1ms nvic");
+    // Debug_Info(Bsp_Tim_TAG, "tim2 1ms nvic");
 }
 
-volatile uint8_t tim2_flag;
+volatile uint8_t tim2_1s_flag;
+volatile uint8_t tim2_50ms_flag;
+volatile uint64_t _1s_cnt;
+volatile uint64_t _time_stamp_ = 0;
+
+uint64_t Tim2_Time_Stamp(void)
+{
+    return _time_stamp_;
+}
+
+uint64_t Tim2_1s_Cnt(void)
+{
+    return _1s_cnt;
+}
 
 void TIM2_IRQHandler(void)
 {
@@ -51,13 +64,20 @@ void TIM2_IRQHandler(void)
 		TIM_ClearITPendingBit(TIM2 , TIM_FLAG_Update);   
         // TIM_ClearITPendingBit(TIM2, TIM_IT_Update);  //清除TIMx更新中断标志 
   		_1ms_cnt++;
-        // printf("_1ms_cnt=%d\r\n",_1ms_cnt);
+        _time_stamp_++;
+        if((_1ms_cnt%50)==0) {
+            tim2_50ms_flag = 1;
+            Key_Scan();
+
+        }
+
         if(_1ms_cnt==1000)
         {
             _1ms_cnt = 0;
+            _1s_cnt++;
             // Debug_Info(Bsp_Tim_TAG, "TIM2_IRQHandler");
-            tim2_flag = 1;
-            Tim2_1s_Callback();
+            tim2_1s_flag = 1;
+            // Tim2_1s_Callback();
         }
 	}		 	
 }

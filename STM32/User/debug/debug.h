@@ -8,6 +8,7 @@
 #include "bsp_debug.h"
 #include "utils.h"
 #include "common.h"
+#include "bsp_tim.h"
 #include <stdio.h>
 #include <stdarg.h>
 

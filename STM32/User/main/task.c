@@ -20,9 +20,13 @@ void Task_Status(void)
     sprintf(task_line0, "E:%s   G:%s   R:%s", Task_Mqtt_Status(),Task_Gps_Status(), Task_Rfid_Status());
     Oled_Clear();
     Oled_Show_String(0,OLED_LINE0,task_line0);
-    // Oled_Show_String(0,2,"1234567890abcde1");
-    // Oled_Show_String(0,4,"1234567890abcde2");
-    // Oled_Show_String(0,6,"1234567890abcde3");
+    if(_task.rfid_s==0x00) {
+        Oled_Show_String(0,2,"running...");
+        if(_task.mqtt_s==0xf0) Oled_Show_String(0,2,"restart...");
+        if(_task.mqtt_s==0xe1) Oled_Show_String(0,2,"sim...");
+        if(_task.mqtt_s==0xd1) Oled_Show_String(0,2,"net...");
+        if(_task.mqtt_s==0xc1) Oled_Show_String(0,2,"connect...");
+    }
 }
 
 char *Task_Mqtt_Status(void)
@@ -63,8 +67,9 @@ char *Task_Rfid_Status(void)
 const char* mission = "123456789-416421";
 
 static char* RFID_MQTT_STR = "{\"code\":%d,\"mission\":\"%s\",\"trackId\":\"%s\",\"status\":%d}";
+static char* GPS_MQTT_STR = "{\"code\":%d,\"mission\":\"%s\",\"latitude\":\"%s\",\"longitude\":\"%s\"}";
 
-#define Test
+// #define Test
 
 #ifdef Test
 void Task_Rfid_Scan_Test(void)
@@ -97,98 +102,102 @@ void Task_Rfid_Scan_Test(void)
 }
 #endif
 
-void Task_Rfid_Scan(void)
+uint8_t cardCnt =0;
+
+void Task_Sys_Show(void)
 {
-    RfidType *data = NULL;
-	char cmp[16];
-    _task.rfid_s = 0x01;
     Task_Status();
-    // 显示mission
-    sprintf(task_line1, "%s", mission);
-    Oled_Show_String(0,OLED_LINE1,task_line1);
-    #ifdef Test
-        Task_Rfid_Scan_Test();
-    #else
-    data = Rfid_Read_TrackId_Mission_Address_Status('A', false);
-    if(data == NULL) {
-        Debug_Info(Task_TAG, "rfid读取错误");
-        Task_Status();
-        return;
-    }
-    // 显示trackId
-    sprintf(task_line2, "%s", data->pData->trackId);
-	Oled_Show_String(0,OLED_LINE2,task_line2);
-    sscanf(mission, "%[^-]-%[^-]", cmp, cmp+9);
-    if(strcmp(data->pData->missionId, cmp)!=0) {
-        sprintf(task_line3, "%s", "error");
-	    Oled_Show_String(0,OLED_LINE3,task_line3);
-        Debug_Info(Task_TAG, "missionId不符合，不能装车");
-        Debug_Info(Task_TAG, "missionId:%s",data->pData->missionId);
-        sprintf(task_line3, "%s", "mission error");
-	    Oled_Show_String(0,OLED_LINE3,task_line3);
-    } else if(0x00!=data->pData->status){
-        Debug_Info(Task_TAG, "该订单已配送");
-        Debug_Info(Task_TAG, "trackId:%s",data->pData->trackId);
-        sprintf(task_line3, "%s", "status error");
-	    Oled_Show_String(0,OLED_LINE3,task_line3);
-    } else {
-        char *buf = (char*)calloc(256,sizeof(char));
-        sprintf(task_line3, "%s", "success");
-	    Oled_Show_String(0,OLED_LINE3,task_line3);
-        data->pData->status = 0x01;
-        sprintf(buf, RFID_MQTT_STR, 0xf1, mission, data->pData->trackId, data->pData->status);
-        Debug_Info(Task_TAG, "%s=>%s已装车，目的地:%s，状态:0x%02x", 
-                    mission, data->pData->trackId, 
-                    data->pData->address, data->pData->status);
-        if(Rfid_Write_TrackId_Mission_Address_Status(data, true)) {
-            Debug_Info(Task_TAG, "Rfid操作完毕");   
-        } else {
-            Debug_Info(Task_TAG, "rfid写入错误");   
-        }
-        Debug_Info(Task_TAG, "mqtt data:");
-        Mqtt_Publish(Topic_Card_Test, buf, strlen(buf),0);
-    }
-    free(data);
-    #endif
 }
 
-uint16_t Mqtt_Rfid_Data_Build(const RfidType *data, uint8_t len, char *buf)
+void Task_Rfid_Scan(void)
 {
-    char head1[2] = {(16>>8)&0xff, 16&0xff};
-    char head2[2] = {0x00, 1&0xff};
-    uint16_t size = 2+4+len;
-    buf = (char*)calloc(size, sizeof(char));
-    *buf=0xff;*(buf+1)=0xee;
-    memcpy(buf+2,head1,2);
-    memcpy(buf+4,head2,2);
-    memcpy(buf+6,data->pData->trackId,16);
-    memcpy(buf+6+16,&(data->pData->status),1);
-    return size;
+    RfidType *data = (RfidType*)calloc(1, sizeof(RfidType));
+	char cmp[16];
+    _task.rfid_s = 0x01;
+    while (1)
+    {
+        Task_Status();
+        // 显示mission
+        sprintf(task_line1, "%s", mission);
+        Oled_Show_String(0,OLED_LINE1,task_line1);
+        Oled_Show_String(0,OLED_LINE2,"...");
+        #ifdef Test
+        Task_Rfid_Scan_Test();
+        #else
+        // data = Rfid_Read_TrackId_Mission_Address_Status(data, 'A', false);
+        if(Rfid_Read_TrackId_Mission_Address_Status(data, 'A', false)==false) {
+            Debug_Info(Task_TAG, "rfid读取错误");
+            Task_Status();
+            return;
+        }
+        // 显示trackId
+        sprintf(task_line2, "%s", data->data.trackId);
+        Oled_Show_String(0,OLED_LINE2,task_line2);
+        sscanf(mission, "%[^-]-%[^-]", cmp, cmp+9);
+        Debug_Info(Task_TAG, "mission:%s",data->data.missionId);
+        if(strcmp(data->data.missionId, cmp)!=0) {
+            sprintf(task_line3, "%s", "error");
+            Oled_Show_String(0,OLED_LINE3,task_line3);
+            Debug_Info(Task_TAG, "missionId不符合，不能装车");
+            Debug_Info(Task_TAG, "missionId:%s",data->data.missionId);
+            sprintf(task_line3, "%s", "mission error");
+            Oled_Show_String(0,OLED_LINE3,task_line3);
+        } else if(0x00!=data->data.status){
+            Debug_Info(Task_TAG, "该订单已配送");
+            Debug_Info(Task_TAG, "trackId:%s",data->data.trackId);
+            sprintf(task_line3, "%s", "status error");
+            Oled_Show_String(0,OLED_LINE3,task_line3);
+            delay_ms(2000);
+        } else {
+            char *buf = (char*)calloc(256,sizeof(char));
+            sprintf(task_line3, "%s", "success,exit");
+            Oled_Show_String(0,OLED_LINE3,task_line3);
+            data->data.status = 0x01;
+            sprintf(buf, RFID_MQTT_STR, 0xf1, mission, data->data.trackId, data->data.status);
+            Debug_Info(Task_TAG, "%s=>%s已装车，目的地:%s，状态:0x%02x", 
+                        mission, data->data.trackId, 
+                        data->data.address, data->data.status);
+            Debug_Info(Task_TAG, "8");
+            if(Rfid_Write_TrackId_Mission_Address_Status(data, true)) {
+                Debug_Info(Task_TAG, "Rfid操作完毕");   
+            } else {
+                Debug_Info(Task_TAG, "rfid写入错误");   
+            }
+            Debug_Info(Task_TAG, "mqtt data:%s",buf);
+            // Mqtt_Publish(Topic_Card_Scan_Post, buf, strlen(buf),1);
+            free(buf);
+        }
+        cardCnt++;
+        Debug_Info(Task_TAG, "scan card cnt:%d", cardCnt);
+        #endif
+    }
+    free(data);
+    
 }
 
 void Task_Rfid_Write(const char *data)
 {
 	RfidType *rfid = (RfidType *)calloc(1, sizeof(RfidType));
-	Model *model = (Model *)calloc(1, sizeof(Model));
+	Model model;
 	uint8_t len;
     _task.rfid_s = 0x01;
     Task_Status();
 	Debug_Info(Task_TAG, "开始写数据");
-	len = sscanf(data, "%[^,],%[^,],0x%02x", model->trackId, model->address, &(model->status));
+	len = sscanf(data, "%[^,],%[^,],0x%02x", &(model.trackId), &(model.address), &(model.status));
 	if(len!=3) {
 		Debug_Info(Task_TAG, "输入数据格式错误");
 	} else {
-		if(strlen(model->trackId)>Model_TrackId_Len ||
-			strlen(model->address)>Model_Address_Len) {
+		if(strlen(model.trackId)>Model_TrackId_Len ||
+			strlen(model.address)>Model_Address_Len) {
 			Debug_Info(Task_TAG, "输入数据错误");
 		} else {
-			Debug_Info(Task_TAG, "trackId:%s",model->trackId);
-			Debug_Info(Task_TAG, "address:%s",model->address);
-			Debug_Info(Task_TAG, "status:0x%02x",model->status);
-            sscanf("461237889-541354", "%[^-]-%[^-]", model->missionId, (model->missionId)+9);
+			Debug_Info(Task_TAG, "trackId:%s",model.trackId);
+			Debug_Info(Task_TAG, "address:%s",model.address);
+			Debug_Info(Task_TAG, "status:0x%02x",model.status);
+            sscanf("123456789-416421", "%[^-]-%[^-]", model.missionId, (model.missionId)+9);
             // strcpy(model->missionId, "461237889541354");
-            Debug_Info(Task_TAG, "mission:%s",model->missionId);
-			rfid->pData = model;
+            Debug_Info(Task_TAG, "mission:%s",model.missionId);
+			rfid->data = model;
 			rfid->cardType = 'A';
 			if(Rfid_Write_TrackId_Mission_Address_Status(rfid, true)) {
 			    Debug_Info(Task_TAG, "Rfid操作完毕");   
@@ -198,8 +207,6 @@ void Task_Rfid_Write(const char *data)
 
 		}
 	}
-
-	free(model);
 	free(rfid);
 }
 
@@ -210,12 +217,37 @@ void Task_Mqtt_Pub(void)
     Debug_Info(Task_TAG, "Mqtt Pub");
 }
 
+volatile uint16_t _gps_cnt;
+
 void Task_Gps_S(void)
 {
     _task.rfid_s = 0x00;
     _task.gps_s = 0x01;
     Task_Status();
+    Tim2_Callback_Add(Gps_Data_Get);
+    Tim2_Callback_Add(Task_Mqtt_Gps);
     Debug_Info(Task_TAG, "Gps开启");
+}
+
+void Task_Mqtt_Gps()
+{
+    GpsData* data = Gps_Data_Buf();
+    char buf[256];
+    char lat[13], lon[14];
+    if(data->isUsefull) {
+        sprintf(lat, "%s-%s",data->latitude, data->N_S);
+        sprintf(lon, "%s-%s",data->longitude, data->E_W);
+        sprintf(buf, GPS_MQTT_STR, 0xf1, mission, lat, lon);
+        Debug_Info(Task_TAG, "mqtt data:%s",buf);
+    } else {
+        sprintf(lat, "%s-%s","none", "x");
+        sprintf(lon, "%s-%s","none", "x");
+        sprintf(buf, GPS_MQTT_STR, 0xf1, mission, lat, lon);
+        Debug_Info(Task_TAG, "mqtt data:%s",buf);
+        // Mqtt_Publish(Topic_Card_Gps_Post, buf, strlen(buf),0);
+    }
+    // Mqtt_Publish(Topic_Card_Gps_Post, buf, strlen(buf),0);
+
 }
 
 void Task_Gps_E(void)
@@ -223,5 +255,99 @@ void Task_Gps_E(void)
     _task.rfid_s = 0x00;
     _task.gps_s = 0x00;
     Task_Status();
+    Debug_Info(Task_TAG, "...");
+    Tim2_Callback_Remove(Task_Mqtt_Gps);
+    Tim2_Callback_Remove(Gps_Data_Get);
     Debug_Info(Task_TAG, "Gps结束");
+}
+
+void Task_Btn_Init(void)
+{
+    GPIO_InitTypeDef gpio_Init;
+    EXTI_InitTypeDef exti_Init;
+    NVIC_InitTypeDef nvic_Init;
+
+    gpio_Init.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
+    gpio_Init.GPIO_Mode = GPIO_Mode_IPU;
+    GPIO_Init(GPIOB, &gpio_Init);
+
+    RCC_APB2PeriphClockCmd( RCC_APB2Periph_AFIO, ENABLE );
+    GPIO_EXTILineConfig(GPIO_PortSourceGPIOB,  GPIO_PinSource8 | GPIO_PinSource9);
+    exti_Init.EXTI_Line =  EXTI_Line8 | EXTI_Line9;
+    /* EXTI 为中断模式 */
+    exti_Init.EXTI_Mode = EXTI_Mode_Interrupt;
+    /* 下降沿中断 */
+    exti_Init.EXTI_Trigger = EXTI_Trigger_Falling;
+    /* 使能中断 */
+    exti_Init.EXTI_LineCmd = ENABLE;
+    EXTI_Init(&exti_Init);
+
+    /* 配置 NVIC 为优先级组 */
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+    /* 配置中断源：按键 */
+    nvic_Init.NVIC_IRQChannel = EXTI9_5_IRQn;
+    /* 配置抢占优先级 */
+    nvic_Init.NVIC_IRQChannelPreemptionPriority = 2;
+    /* 配置子优先级 */
+    nvic_Init.NVIC_IRQChannelSubPriority = 3;
+    /* 使能中断通道 */
+    nvic_Init.NVIC_IRQChannelCmd = ENABLE; 
+    NVIC_Init(&nvic_Init);
+
+}
+
+extern volatile uint8_t cmd_task;
+extern volatile uint8_t tim2_1s_flag;
+extern volatile uint16_t _1ms_cnt;
+
+volatile uint64_t btn9_ms_cnt = 0;
+volatile uint16_t btn9_s_cnt = 0;
+volatile uint8_t btn9_flag = 0;
+#define Btn_9_Delay     100
+
+void EXTI9_5_IRQHandler()
+{
+    uint8_t flag;
+    if (EXTI_GetITStatus(EXTI_Line5) != RESET) 
+    { 
+        EXTI_ClearITPendingBit(EXTI_Line5);
+        Debug_Info(Task_TAG, "中断5");
+    }
+
+    if (EXTI_GetITStatus(EXTI_Line8) != RESET) 
+    { 
+        EXTI_ClearITPendingBit(EXTI_Line8);
+        Debug_Info(Task_TAG, "中断8");
+    }
+
+    if (EXTI_GetITStatus(EXTI_Line9) != RESET) 
+    { 
+        Debug_Info(Task_TAG, "中断9");
+        // if(btn9_flag==0) {
+        //     btn9_flag = 1;
+        //     btn9_ms_cnt = Tim2_Time_Stamp();
+        //     Debug_Info(Task_TAG, "按下按键:%ld", btn9_ms_cnt);
+        // } else {
+        //     flag = GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_9);
+        //     // Debug_Info(Task_TAG, "电平:%d",flag);
+        //     if(flag==1) {
+        //         btn9_flag = 0;
+        //         Debug_Info(Task_TAG, "松开按键:%ld", Tim2_Time_Stamp());
+        //         if(Tim2_Time_Stamp() - btn9_ms_cnt > Btn_9_Delay) {
+        //             Debug_Info(Task_TAG, "按键触发");
+        //         } else {
+        //             Debug_Info(Task_TAG, "按键误触");
+        //         }
+        //     }
+        // }
+        // if(_task.rfid_s == 0x00) {
+        //     cmd_task = CMD_RFID_R;
+        //     _task.rfid_s = 0x01;
+        //     Debug_Info(Task_TAG, "开启RFID扫描");
+        // } else {
+        //     Debug_Info(Task_TAG, "Rfid已运行，请等待结束");
+        // }
+        EXTI_ClearITPendingBit(EXTI_Line9);
+    }
+
 }

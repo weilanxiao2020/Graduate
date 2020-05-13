@@ -7,6 +7,7 @@
     <string name="tv_staff_mission_address">目的地\n %s</string>
     <string name="tv_user_order">订单号: %s</string>
     <string name="tv_user_receiver">收件人: %s</string>
+    <string name="tv_user_order_distance">距离: %s</string>
     <string name="btn_staff_login">登录</string>
     <string name="tv_mission_gps">%s[%s]\n%s[%s]</string>
     <string name="tv_mission_region">%s</string>

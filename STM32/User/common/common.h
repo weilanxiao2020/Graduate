@@ -23,6 +23,8 @@ void delay_us(uint32_t us);
 #define RUN 0x04
 #define OUT 0x08
 
+#define CMD_SYS_S       0x01
+
 #define CMD_RFID_R      0x10
 #define CMD_RFID_W      0x11
 #define CMD_RFID_E      0x12
@@ -30,13 +32,16 @@ void delay_us(uint32_t us);
 #define CMD_GPS_S       0x20
 #define CMD_GPS_E       0x21
 
-
 typedef struct {
-    // mqtt_s:0x00,0x01,0x02,0x03,0x04
+    // mqtt_s:0x00,0x01
     volatile uint8_t mqtt_s;
-    // rfid_s:0x00,0x01,0x02,0x03
+    // rfid_s:0x00,0x01
     volatile uint8_t rfid_s;
     volatile uint8_t gps_s;
+    // sys_s:0x00可以显示所有状态，0x01显示完成
+    volatile uint8_t sys_s;
 }Task;
+
+typedef enum {Off=0x00, On=!Off};
 
 #endif

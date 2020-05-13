@@ -3,6 +3,7 @@ package com.miyako.utils;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import sun.rmi.runtime.Log;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -46,7 +47,7 @@ public class MapUtil{
             conn.setRequestMethod(method);
             // 设置通用的请求属性
             for (Map.Entry<String, String> entry : headers.entrySet()) {
-                System.out.println(entry.getKey() + ":" + entry.getValue());
+                LogUtil.d(TAG,entry.getKey() + ":" + entry.getValue());
                 conn.setRequestProperty(entry.getKey(), entry.getValue());
             }
             java.io.BufferedReader in = new java.io.BufferedReader(new java.io.InputStreamReader(conn.getInputStream(),"UTF-8"));
@@ -75,6 +76,7 @@ public class MapUtil{
 
     private static String parseJson(String json) {
         // json解析器，解析json数据
+        LogUtil.d(TAG, "response:"+json);
         JsonParser parser = new JsonParser();
         JsonElement element = parser.parse(json);
         // json属于对象类型时
@@ -83,7 +85,7 @@ public class MapUtil{
             JsonObject object = element.getAsJsonObject();  // 转化为对象
             // 1. value为string时，取出string
             int code = object.get("infocode").getAsInt();
-            System.out.println("infocode:"+code);
+            LogUtil.d(TAG,"infocode:" + code);
             if(code!=10000) {
                 LogUtil.d(TAG, "请求错误");
                 return region;
@@ -103,6 +105,7 @@ public class MapUtil{
             }
             region = adCode;
         }
+        LogUtil.d(TAG, "region code:"+region);
         return region;
     }
 }

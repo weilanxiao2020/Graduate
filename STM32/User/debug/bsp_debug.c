@@ -50,7 +50,7 @@ void Debug_Usart_NVIC(void)
 	#endif
 
 	/* Configure the NVIC Preemption Priority Bits */  
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0);//设置优先级分组：先占优先级和从优先级
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0);					//设置优先级分组：先占优先级和从优先级
 
 	/* Enable the USART1 Interrupt */
 	nvic_Init.NVIC_IRQChannel = DEBUG_USART_IRQ;

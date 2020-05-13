@@ -9,6 +9,7 @@ import com.miyako.model.GPS;
 import com.miyako.model.Order;
 import com.miyako.utils.LogUtil;
 import com.miyako.utils.MapUtil;
+import sun.rmi.runtime.Log;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -35,8 +36,20 @@ public class ParseMqtt{
     private static Map<String, String> regionMap = new HashMap<>();
     //private static long spanTime = 1000 * 60;
     //private static int span = 60;
-    private static long spanTime = 5;
+    private static long spanTime = 60;
     private static int span = 1 * 1000;
+
+    private static double convertGps(String val) {
+        double res = Double.valueOf(val);
+        int temp = (int) res;
+        //LogUtil.d(TAG, "temp:"+temp);
+        //LogUtil.d(TAG, "val:"+(res-temp));
+        //LogUtil.d(TAG, "度:"+(temp/100));
+        //LogUtil.d(TAG, "s:"+(temp%100/60.0));
+        //LogUtil.d(TAG, "d:"+((res-temp) *60  / 3600.0));
+        res = temp/100 + temp%100/60.0 + (res-temp) / 600.0;
+        return res;
+    }
 
     public static GPS parseGpsMqtt(byte[] data) {
         GPS gps = null;
@@ -51,26 +64,32 @@ public class ParseMqtt{
         String missionId = object.get("mission").getAsString();
         String latitude = object.get("latitude").getAsString();
         String longitude = object.get("longitude").getAsString();
-        //String latitude = "";
-        //String longitude = "";
         LogUtil.d(TAG, "mission:"+missionId);
+
+        String[] lat_s = latitude.split("-");
+        String[] lon_s = longitude.split("-");
+        if("x".equals(lat_s[1]) || "x".equals(lon_s[1])) {
+            LogUtil.d(TAG, "gps无效");
+            return null;
+        }
+        double lat = convertGps(lat_s[0]);
+        double lon = convertGps(lon_s[0]);
+        LogUtil.d(TAG, String.format("convert gps:%s,%s",lat,lon));
         gps = new GPS();
         gps.setMissionId(missionId);
         gps.setTimestamp(System.currentTimeMillis());
-        gps.setLatitude(latitude);
-        gps.setLongitude(longitude);
+        gps.setLatitude(lat+lat_s[1]);
+        gps.setLongitude(lon+lon_s[1]);
         if (!intervalMap.containsKey(missionId)) {
             intervalMap.put(missionId, System.currentTimeMillis());
-            gps.setRegion(MapUtil.gpsParse(Double.valueOf(latitude.substring(0,latitude.length()-2)),
-                                           Double.valueOf(longitude.substring(0, longitude.length()-2))));
+            gps.setRegion(MapUtil.gpsParse(lat, lon));
             regionMap.put(missionId, gps.getRegion());
         } else {
             long diff = gps.getTimestamp() - intervalMap.get(missionId);
             LogUtil.d(TAG, "diff:"+diff);
             if(diff / (spanTime)> span) {
                 // 时间间隔达到阈值，更新gps区域
-                gps.setRegion(MapUtil.gpsParse(Double.valueOf(latitude.substring(0,latitude.length()-2)),
-                                               Double.valueOf(longitude.substring(0, longitude.length()-2))));
+                gps.setRegion(MapUtil.gpsParse(lat,lon));
                 regionMap.put(missionId, gps.getRegion());
             } else {
                 // 时间间隔未达到阈值
@@ -78,11 +97,12 @@ public class ParseMqtt{
             }
         }
 
-        if (GPSDao.insert(gps) != -1) {
-            LogUtil.d(TAG, "mqtt消息处理成功");
-        } else {
-            LogUtil.d(TAG, "mqtt消息处理异常");
-        }
+        //if (GPSDao.insert(gps) != -1) {
+        //    LogUtil.d(TAG, "mqtt消息处理成功");
+        //} else {
+        //    LogUtil.d(TAG, "mqtt消息处理异常");
+        //    gps = null;
+        //}
 
         //if(data[0] != (byte) 0xfe) {
         //    LogUtil.d(TAG, "接收mqtt消息异常");

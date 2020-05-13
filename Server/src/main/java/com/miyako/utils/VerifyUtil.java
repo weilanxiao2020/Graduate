@@ -68,31 +68,32 @@ public class VerifyUtil {
         //}
     }
 
-    public static boolean verfiyRegion(int adCode) {
+    public static String verfiyRegion(int adCode) {
         String code = adCode+"";
         for(int i =0;i<provinceCity.provinces.length;i++) {
             Province province = provinceCity.provinces[i];
             String pre = (province.code+"").substring(0,2);
             if (code.startsWith(pre)) {
-                LogUtil.d(TAG, "pre:"+pre);
+                //LogUtil.d(TAG, "pre:"+pre);
                 for(int j =0;j<province.cities.length;j++) {
                     City city = province.cities[j];
                     String pre_mid = (city.code+"").substring(0,4);
                     if(code.startsWith(pre_mid)) {
-                        LogUtil.d(TAG, "pre mid:"+pre_mid);
+                        //LogUtil.d(TAG, "pre mid:"+pre_mid);
                         for (int k = 0; k < city.districts.length; k++) {
                             District district = city.districts[k];
-                            LogUtil.d(TAG, "code:"+district.code);
+                            //LogUtil.d(TAG, "code:"+district.code);
                             if ((district.code+"").startsWith(code)) {
-                                LogUtil.d(TAG, String.format("匹配：%s-%s-%s", province.province,city.city,district.district));
-                                return true;
+                                String address = String.format("%s-%s-%s", province.province,city.city,district.district);
+                                LogUtil.d(TAG, "匹配:"+address);
+                                return address;
                             }
                         }
                     }
                 }
             }
         }
-        return false;
+        return "";
     }
 
     public static boolean verfiyRegion(String address) {

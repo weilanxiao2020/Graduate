@@ -15,7 +15,13 @@ void Gps_Init(void)
 void Gps_Data_Get(void)
 {
 	Gps_Data_Parse();
-	Gps_Data_Print();
+	// Gps_Data_Print();
+}
+
+GpsData* Gps_Data_Buf(void)
+{
+	Debug_Info(Gps_TAG, "get gps data");
+	return gpsData;
 }
 
 // extern GpsData gpsData;
@@ -23,57 +29,31 @@ void Gps_Data_Parse(void)
 {
     char *subString;
 	char *subStringNext;
-	char i = 0;
+	char len = 0;
+	char usefullBuffer[2];
 	if (gpsData->isGetData)
 	{
 		gpsData->isGetData = false;
         Debug_Info(Gps_TAG, "start parse gps data");
         Debug_Info(Gps_TAG, gpsData->GPS_Buffer);
 
-		for (i = 0 ; i <= 6 ; i++)
-		{
-			if (i == 0)
-			{
-				if ((subString = strstr(gpsData->GPS_Buffer, ",")) == NULL)
-                {
-                    Debug_Error(Gps_TAG, "parse gps data error");	//解析错误
-                    break;
-                }
-					
-			}
-			else
-			{
-				subString++;
-				if ((subStringNext = strstr(subString, ",")) != NULL)
-				{
-					char usefullBuffer[2]; 
-					switch(i)
-					{
-						case 1:memcpy(gpsData->UTCTime, subString, subStringNext - subString);break;	//获取UTC时间
-						case 2:memcpy(usefullBuffer, subString, subStringNext - subString);break;	//获取UTC时间
-						case 3:memcpy(gpsData->latitude, subString, subStringNext - subString);break;	//获取纬度信息
-						case 4:memcpy(gpsData->N_S, subString, subStringNext - subString);break;	//获取N/S
-						case 5:memcpy(gpsData->longitude, subString, subStringNext - subString);break;	//获取经度信息
-						case 6:memcpy(gpsData->E_W, subString, subStringNext - subString);break;	//获取E/W
+		len = sscanf(gpsData->GPS_Buffer, 
+				"$GPRMC,%[^,],%[^,],%[^,],%[^,],%[^,],%[^,]",
+				gpsData->UTCTime, usefullBuffer, gpsData->latitude, gpsData->N_S,
+				gpsData->longitude, gpsData->E_W);
 
-						default:break;
-					}
-
-					subString = subStringNext;
-					gpsData->isParseData = true;
-					if(usefullBuffer[0] == 'A')
-						gpsData->isUsefull = true;
-					else if(usefullBuffer[0] == 'V')
-						gpsData->isUsefull = false;
-
-				}
-				else
-				{
-                    Debug_Error(Gps_TAG, "parse gps data error");	//解析错误
-                    break;
-				}
-			}
+		if(len==6) {
+			gpsData->isParseData = true;
+			if(usefullBuffer[0] == 'A')
+				gpsData->isUsefull = true;
+			else if(usefullBuffer[0] == 'V')
+				gpsData->isUsefull = false;
+		} else {
+			gpsData->isParseData = false;
+			Debug_Error(Gps_TAG, "parse gps data error");	//解析错误
 		}
+	} else {
+		gpsData->isUsefull = false;
 	}
 }
 

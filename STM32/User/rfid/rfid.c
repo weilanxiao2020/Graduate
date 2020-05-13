@@ -61,13 +61,13 @@ void printf_hex(const char *str, const byte *data, uint8_t len)
 }
 
 // 读取卡片
-RfidType *Rfid_Read(uint8_t cardType)
+uint8_t Rfid_Read(RfidType* rfid, uint8_t cardType)
 {                                                                                                                                                                                
 	uint8_t pId[4];/*先后存放IC卡的类型和UID(IC卡序列号)*/   
 	CardMap maps[5] = {TrackId, Timestamp, Sender, Receiver, Address};
 	byte data[16]={0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff};
-	RfidType* rfid = (RfidType *)calloc(1, sizeof(RfidType));	
-	Model *model = (Model *)calloc(1, sizeof(Model));
+	// RfidType* rfid = (RfidType *)calloc(1, sizeof(RfidType));	
+	// Model *model = (Model *)calloc(1, sizeof(Model));
 	rfid->cardId = DEFAULT_CARD_ID;
 	rfid->cardType = cardType;
 	printf_hex("Rfid_Read buf", data, 16);
@@ -75,20 +75,21 @@ RfidType *Rfid_Read(uint8_t cardType)
 	{
 		printf_hex("read sender", data, 16);
 		byte_16_convert_byte_n(data, pId, 4);
-		model->sender = u8_to_u32(pId);
-		Debug_Info(Rfid_TAG, "read sender 0x%x", model->sender);
-		rfid->pData = model;
+		rfid->data.sender = u8_to_u32(pId);
+		Debug_Info(Rfid_TAG, "read sender 0x%x", rfid->data.sender);
+		// rfid->data = model;
 		Led_Glint(1);
+		return true;
 	}
-	return rfid;
+	return false;
 }
 
-RfidType *Rfid_Read_All(uint8_t cardType) 
+uint8_t Rfid_Read_All(RfidType* rfid, uint8_t cardType) 
 { 
 	CardMap maps[6] = {TrackId, Timestamp, Sender, Receiver, Address, Status};
 	byte *data = (byte *)calloc(5,sizeof(byte)*16);
-	RfidType* rfid = (RfidType *)calloc(1, sizeof(RfidType));	
-	Model *model = (Model *)calloc(1, sizeof(Model));
+	// RfidType* rfid = (RfidType *)calloc(1, sizeof(RfidType));	
+	// Model *model = (Model *)calloc(1, sizeof(Model));
 	rfid->cardId = DEFAULT_CARD_ID;
 	rfid->cardType = cardType;
 	if(Rfid_WR_Datas(cardType, data, maps, 6, Read, true))
@@ -97,60 +98,60 @@ RfidType *Rfid_Read_All(uint8_t cardType)
 		char address[16];
 		uint8_t status;
 
-		byte_16_convert_byte_n(data, model->trackId, 16);
+		byte_16_convert_byte_n(data, rfid->data.trackId, 16);
 		byte_16_convert_byte_n(data+16, data+16, 8);
 		byte_16_convert_byte_n(data+32, data+32, 4);
 		byte_16_convert_byte_n(data+48, data+48, 4);
-		byte_16_convert_byte_n(data+64, model->address, 16);
+		byte_16_convert_byte_n(data+64, rfid->data.address, 16);
 		byte_16_convert_byte_n(data+80, &status, 1);
 
 		// model->trackId = trackId;
-		model->timestamp = u8_to_u64(data+16);
-		model->sender = u8_to_u32(data+32);
-		model->receiver = u8_to_u32(data+48);
+		rfid->data.timestamp = u8_to_u64(data+16);
+		rfid->data.sender = u8_to_u32(data+32);
+		rfid->data.receiver = u8_to_u32(data+48);
 		// model->address = address;
-		model->status = status;
-		rfid->pData = model;
+		rfid->data.status = status;
+		// rfid->data = model;
 		Led_Glint(1);
+		free(data);
+		return true;
 	}
 	free(data);
-	return rfid;
+	return false;
 }
 
-RfidType *Rfid_Read_TrackId_Mission_Address_Status(uint8_t cardType, uint8_t isWait)
+uint8_t Rfid_Read_TrackId_Mission_Address_Status(RfidType *rfid, uint8_t cardType, uint8_t isWait)
 {
 	CardMap maps[4] = {TrackId, Address, MissionId, Status};
 	byte *data = (byte *)calloc(4,sizeof(byte)*16);
-	RfidType *rfid = (RfidType *)calloc(1, sizeof(RfidType));	
-	Model *model = (Model *)calloc(1, sizeof(Model));
+	// RfidType *rfid = (RfidType *)calloc(1, sizeof(RfidType));	
+	Model model;
 	rfid->cardId = DEFAULT_CARD_ID;
 	rfid->cardType = cardType;
 	Debug_Info(Rfid_TAG, "read t m a s");
 	if(Rfid_WR_Datas(cardType, data, maps, 4, Read, isWait))
 	{
-		byte_16_convert_byte_n(data, model->trackId, 16);
-		byte_16_convert_byte_n(data+16, model->address, 16);
-		byte_16_convert_byte_n(data+32, model->missionId, 16);
-		byte_16_convert_byte_n(data+48, &(model->status), 1);
-		rfid->pData = model;
+		byte_16_convert_byte_n(data, model.trackId, 16);
+		byte_16_convert_byte_n(data+16, model.address, 16);
+		byte_16_convert_byte_n(data+32, model.missionId, 16);
+		byte_16_convert_byte_n(data+48, &(model.status), 1);
+		rfid->data = model;
 		Led_Glint(1);
 	} else {
-		free(model);
-		free(rfid);
-		rfid = NULL;
+		return false;
 	}
 	free(data);
-	return rfid;
+	return true;
 }
 
 uint8_t Rfid_Write_TrackId_Mission_Address_Status(const RfidType* pRfid, uint8_t isWait)
 {
 	CardMap maps[4] = {TrackId, Address, MissionId, Status};
 	byte *data = (byte *)calloc(4, sizeof(byte)*16);
-	char *trackId = pRfid->pData->trackId;
-	char *address = pRfid->pData->address;
-	char *mission = pRfid->pData->missionId;
-	uint8_t status = pRfid->pData->status;
+	const char *trackId = pRfid->data.trackId;
+	const char *address = pRfid->data.address;
+	const char *mission = pRfid->data.missionId;
+	uint8_t status = pRfid->data.status;
 	byte_n_convert_byte_16(trackId, 16, data);
 	byte_n_convert_byte_16(address, 16, data+16);
 	byte_n_convert_byte_16(mission, 16, data+32);
@@ -166,24 +167,26 @@ uint8_t Rfid_Write_TrackId_Mission_Address_Status(const RfidType* pRfid, uint8_t
 
 }
 
-RfidType *Rfid_Read_TrackId_Address_Status(uint8_t cardType)
+uint8_t Rfid_Read_TrackId_Address_Status(RfidType *rfid, uint8_t cardType)
 {
 	CardMap maps[3] = {TrackId, Address, Status};
 	byte *data = (byte *)calloc(3,sizeof(byte)*16);
-	RfidType *rfid = (RfidType *)calloc(1, sizeof(RfidType));	
-	Model *model = (Model *)calloc(1, sizeof(Model));
+	// RfidType *rfid = (RfidType *)calloc(1, sizeof(RfidType));	
+	// Model *model = (Model *)calloc(1, sizeof(Model));
 	rfid->cardId = DEFAULT_CARD_ID;
 	rfid->cardType = cardType;
 	if(Rfid_WR_Datas(cardType, data, maps, 3, Read, true))
 	{
-		byte_16_convert_byte_n(data, model->trackId, 16);
-		byte_16_convert_byte_n(data+16, model->address, 16);
-		byte_16_convert_byte_n(data+32, &(model->status), 1);
-		rfid->pData = model;
+		byte_16_convert_byte_n(data, rfid->data.trackId, 16);
+		byte_16_convert_byte_n(data+16, rfid->data.address, 16);
+		byte_16_convert_byte_n(data+32, &(rfid->data.status), 1);
+		// rfid->pData = model;
 		Led_Glint(1);
+		free(data);
+		return true;
 	}
 	free(data);
-	return rfid;
+	return false;
 }
 
 // 写trackId，address和status
@@ -191,9 +194,9 @@ void Rfid_Write_TrackId_Address_Status(const RfidType* pRfid)
 {
 	CardMap maps[3] = {TrackId, Address, Status};
 	byte *data = (byte *)calloc(3, sizeof(byte)*16);
-	char *trackId = pRfid->pData->trackId;
-	char *address = pRfid->pData->address;
-	uint8_t status = pRfid->pData->status;
+	const char *trackId = pRfid->data.trackId;
+	const char *address = pRfid->data.address;
+	uint8_t status = pRfid->data.status;
 	byte_n_convert_byte_16(trackId, 16, data);
 	byte_n_convert_byte_16(address, 16, data+16);
 	byte_n_convert_byte_16(&status, 1, data+32);
@@ -205,13 +208,13 @@ void Rfid_Write_All(const RfidType* pRfid)
 {
 	CardMap maps[6] = {TrackId, Timestamp, Sender, Receiver, Address, Status};
 	byte *data = (byte *)calloc(6, sizeof(byte)*16);
-	char *trackId = pRfid->pData->trackId;
+	const char *trackId = pRfid->data.trackId;
 	char str[16];
 	// uint64_t timestamp = pRfid->pData->timestamp;
 	// uint32_t sender = pRfid->pData->sender;
 	// uint32_t receiver = pRfid->pData->receiver;
-	char *address = pRfid->pData->address;
-	uint8_t status = pRfid->pData->status;
+	const char *address = pRfid->data.address;
+	uint8_t status = pRfid->data.status;
 	Debug_Info(Rfid_TAG, trackId);
 	Debug_Info(Rfid_TAG, address);
 	// u32_to_u8(trackId, data);
@@ -244,12 +247,12 @@ void Rfid_Write_Sender(const RfidType* pRfid)
 {
 	byte sender[16];
 	Debug_Info(Rfid_TAG, "Rfid_Write_Sender");
-	u32_to_u8(pRfid->pData->sender, sender);
+	u32_to_u8(pRfid->data.sender, sender);
 	byte_n_convert_byte_16(sender, 4, sender);
 	printf_hex("Rfid_Write_Sender buf", sender, 16);
 	if(Rfid_WR_Data(pRfid->cardType, sender, Sender, Write, true))
 	{
-		Debug_Info(Rfid_TAG, "write sender 0x%x", pRfid->pData->sender);
+		Debug_Info(Rfid_TAG, "write sender 0x%x", pRfid->data.sender);
 		Led_Glint(1);
 	}
 }

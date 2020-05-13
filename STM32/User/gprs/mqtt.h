@@ -12,6 +12,7 @@
 
 #define Topic_Card_Test "/a1Tdu6Ry02R/graduate_node_1/user/card_info_post_test"
 #define Topic_Card_Scan_Post "/a1Tdu6Ry02R/graduate_node_1/user/card_scan_rfid_post"
+#define Topic_Card_Gps_Post "/a1Tdu6Ry02R/graduate_node_1/user/card_gps_post"
 
 void Mqtt_Init();
 boolean Mqtt_Status();

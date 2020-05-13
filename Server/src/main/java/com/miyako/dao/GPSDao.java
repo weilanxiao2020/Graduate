@@ -58,18 +58,30 @@ public class GPSDao {
         LogUtil.d(TAG, "findByMissionId: "+mission);
         List<Map<String, String>> mapList = MySqlHelper.getInstance().executeQuery(SQL_SELECT_MISSION, new String[]{mission});
         List<GPS> gpsList = create(mapList);
-        return gpsList;
+        return gpsList.size()==0?null:gpsList;
     }
 
     private static final String SQL_SELECT_LAST =
             "SELECT tb_gps.`id`, tb_gps.`timestamp`, tb_gps.`latitude`, tb_gps.`longitude`, " +
             "tb_gps.`region`, tb_gps.`missionId`"
-            +"FROM tb_gps WHERE tb_gps.`missionId` = ? ORDER BY tb_gps.`timestamp` desc limit 1";
+            + "FROM tb_gps WHERE tb_gps.`missionId` = ? ORDER BY tb_gps.`timestamp` DESC limit 1;";
     public static GPS findByMissionIdLast(String mission) {
         LogUtil.d(TAG, "findByMissionIdLast:"+mission);
         List<Map<String, String>> mapList = MySqlHelper.getInstance().executeQuery(SQL_SELECT_LAST, new String[]{mission});
         List<GPS> gpsList = create(mapList);
         return gpsList.size()==0?null:gpsList.get(0);
+    }
+
+    private static final String SQL_SELECT_LAST_BY_REGION =
+            "SELECT tb_gps.`id`, tb_gps.`timestamp`, tb_gps.`latitude`, tb_gps.`longitude`,tb_gps.`region`, tb_gps.`missionId` " +
+            "FROM tb_gps RIGHT JOIN (SELECT tb_gps.region, MAX(tb_gps.`timestamp`) as t FROM tb_gps GROUP BY tb_gps.region) tmp " +
+            "ON tmp.region = tb_gps.`region` AND tmp.t = tb_gps.`timestamp` " +
+            "WHERE tb_gps.`missionId` = ? ORDER BY tb_gps.`timestamp` DESC;";
+    public static List<GPS> findByMissionIdRegion(String mission) {
+        LogUtil.d(TAG, "findByMissionIdRegion:"+mission);
+        List<Map<String, String>> mapList = MySqlHelper.getInstance().executeQuery(SQL_SELECT_LAST_BY_REGION, new String[]{mission});
+        List<GPS> gpsList = create(mapList);
+        return gpsList.size()==0?null:gpsList;
     }
 
     private static final String SQL_INSERT =
