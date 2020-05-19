@@ -104,7 +104,7 @@ public class VerifyUtil {
                 throw new PatternSyntaxException(null,null,0);
             }
         }catch (PatternSyntaxException ex) {
-            LogUtil.d(TAG, "address is error");
+            LogUtil.e(TAG, "address is error");
             return false;
         }
         LogUtil.d(TAG, "verfiy region:"+target[0]+","+target[1]);

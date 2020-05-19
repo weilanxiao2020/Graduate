@@ -61,14 +61,14 @@ public class MySqlHelper {
 
     private void getDataSource() {
         try {
-            LogUtil.d(TAG, "连接数据库...");
+            LogUtil.i(TAG, "连接数据库...");
             // 注册 JDBC 驱动
             //Class.forName(jdbc);
             // 打开链接
             //connection = DriverManager.getConnection(url, username, password);
             Properties pro = new Properties();
             if (isPool) {
-                LogUtil.d(TAG, "使用druid连接池...");
+                LogUtil.i(TAG, "使用druid连接池...");
                 pro.load(new InputStreamReader(Object.class.getResourceAsStream("/druid.properties"), StandardCharsets.UTF_8));
             }
             pro.put("driverClassName", jdbc);
@@ -80,6 +80,7 @@ public class MySqlHelper {
             // 首次从连接池获取连接时，会初始化话连接池中的连接数
         } catch (Exception e) {
             e.printStackTrace();
+            LogUtil.e(TAG, "获取数据库连接失败:"+e.getMessage());
         }
     }
 
@@ -96,7 +97,7 @@ public class MySqlHelper {
     //update/delete/insert
     //sql格式:UPDATE tablename SET columnn = ? WHERE column = ?
     public int executeUpdate(String sql, String[] parameters) {
-        LogUtil.d(TAG, "数据库修改操作...");
+        LogUtil.i(TAG, "数据库修改操作...");
         int result = -1;
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -105,10 +106,10 @@ public class MySqlHelper {
             //1.创建一个ps
             connection = getConnection();
             if (connection == null) {
-                LogUtil.d(TAG, "获取数据库连接异常");
+                LogUtil.w(TAG, "获取数据库连接异常");
                 return -1;
             }
-            LogUtil.d(TAG, "开启事务...");
+            LogUtil.i(TAG, "开启事务...");
             connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             //给？赋值
@@ -127,14 +128,14 @@ public class MySqlHelper {
         } catch(SQLException e) {
             e.printStackTrace();// 开发阶段
             result = -1;
-            LogUtil.d(TAG, "数据库操作失败...");
+            LogUtil.i(TAG, "数据库操作失败...");
             //回滚事务
             try {
-                LogUtil.d(TAG, "尝试回滚...");
+                LogUtil.i(TAG, "尝试回滚...");
                 connection.rollback();
             } catch (SQLException e1) {
                 e1.printStackTrace();
-                LogUtil.d(TAG, "回滚失败...");
+                LogUtil.i(TAG, "回滚失败...");
             }
             e.printStackTrace();
         } finally{
@@ -154,7 +155,7 @@ public class MySqlHelper {
 
     //select
     public List<Map<String, String>> executeQuery(String sql, String[] parameters){
-        LogUtil.d(TAG, "数据库查询操作...");
+        LogUtil.i(TAG, "数据库查询操作...");
         List<Map<String, String>> list = null;
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -162,7 +163,7 @@ public class MySqlHelper {
         try {
             connection = getConnection();
             if (connection == null) {
-                LogUtil.d(TAG, "获取数据库连接异常");
+                LogUtil.w(TAG, "获取数据库连接异常");
                 return list;
             }
             preparedStatement = connection.prepareStatement(sql);
@@ -182,10 +183,10 @@ public class MySqlHelper {
                 }
                 list.add(map);
             }
-            LogUtil.d(TAG, "返回查询结果");
+            LogUtil.i(TAG, "返回查询结果");
         } catch(SQLException e) {
             e.printStackTrace();
-            LogUtil.d(TAG, "查询异常");
+            LogUtil.e(TAG, "数据库查询失败:"+e.getMessage());
             rs = null;
         } finally {
             close(rs, preparedStatement, connection);
@@ -202,7 +203,7 @@ public class MySqlHelper {
             if (conn !=null) conn.close();
             conn = null;
         }catch (SQLException e) {
-            LogUtil.d(TAG, "关闭连接异常");
+            LogUtil.e(TAG, "关闭连接异常:"+e.getMessage());
             e.printStackTrace();
         }
     }

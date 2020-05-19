@@ -64,20 +64,18 @@ boolean Mqtt_Status()
 	}
 	return false;
 }
-
-boolean Mqtt_Publish(const char *topic, const char *data, uint16_t len, uint8_t qos)
+	// if(_task.mqtt_s != 0x01) {
+	// 	if(Mqtt_Status()==false) {
+	// 		Debug_Info(Mqtt_TAG, "connect mqtt error");
+	// 		_task.mqtt_s = 0x04;
+	// 		return false;
+	// 	}
+    // }
+void Mqtt_Publish(const char *topic, const char *data, uint16_t len, uint8_t qos)
 {
     boolean flag;
 	uint8_t cnt=0;
 	char *str = NULL;
-	// printf("%s",data);
-	if(_task.mqtt_s != 0x01) {
-		if(Mqtt_Status()==false) {
-			Debug_Info(Mqtt_TAG, "connect mqtt error");
-			_task.mqtt_s = 0x04;
-			return false;
-		}
-    }
 	Gprs_Clear_Buffer();
 	Debug_Info(Mqtt_TAG, "wait mqtt publish");
 	str = (char*) calloc(85, sizeof(char));
@@ -95,7 +93,5 @@ boolean Mqtt_Publish(const char *topic, const char *data, uint16_t len, uint8_t 
 	} else {
 		Debug_Info(Mqtt_TAG, "publish error");
 	}
-
 	free(str);
-	return false;
 }

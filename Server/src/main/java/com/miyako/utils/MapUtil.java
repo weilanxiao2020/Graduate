@@ -87,7 +87,7 @@ public class MapUtil{
             int code = object.get("infocode").getAsInt();
             LogUtil.d(TAG,"infocode:" + code);
             if(code!=10000) {
-                LogUtil.d(TAG, "请求错误");
+                LogUtil.e(TAG, "请求错误");
                 return region;
             }
             JsonObject regeocode = object.getAsJsonObject("regeocode");  // 转化为对象

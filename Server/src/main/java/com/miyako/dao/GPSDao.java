@@ -109,7 +109,7 @@ public class GPSDao {
     public static int update(GPS gps) {
         LogUtil.d(TAG, "update: "+gps);
         if (gps.getId()==0) {
-            LogUtil.d(TAG, "数据错误");
+            LogUtil.w(TAG, "数据错误");
             return -1;
         }
 

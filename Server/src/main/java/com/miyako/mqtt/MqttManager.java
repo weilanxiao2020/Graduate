@@ -52,9 +52,9 @@ public class MqttManager{
         // 计算MQTT连接参数
         sign = new MqttSign();
         sign.calculate(productKey, deviceName, deviceSecret);
-        LogUtil.d(TAG, "username: " + sign.getUsername());
-        LogUtil.d(TAG, "password: " + sign.getPassword());
-        LogUtil.d(TAG, "clientId: " + sign.getClientId());
+        LogUtil.i(TAG, "username: " + sign.getUsername());
+        LogUtil.i(TAG, "password: " + sign.getPassword());
+        LogUtil.i(TAG, "clientId: " + sign.getClientId());
         return this;
     }
 
@@ -94,7 +94,7 @@ public class MqttManager{
 
                 @Override
                 public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception{
-                    LogUtil.d(TAG, "messageArrived");
+                    LogUtil.i(TAG, "messageArrived");
                     LogUtil.d(TAG, "接收消息主题 : " + topic);
                     for(Map.Entry<String, ISubscribeCall> entry:callMap.entrySet()) {
                         LogUtil.d(TAG, "待匹配消息主题 : " + entry.getKey());
@@ -102,7 +102,7 @@ public class MqttManager{
                             LogUtil.d(TAG, "匹配主题成功");
                             LogUtil.d(TAG, "接收消息Qos : " + mqttMessage.getQos());
                             //String str = new String(mqttMessage.getPayload());
-                            LogUtil.d(TAG, "接收消息内容字节 : " + mqttMessage.getPayload().length);
+                            LogUtil.i(TAG, "接收消息内容字节 : " + mqttMessage.getPayload().length);
                             entry.getValue().success(mqttMessage.getPayload());
                             break;
                         }
@@ -146,7 +146,7 @@ public class MqttManager{
             }
             mqttClient.subscribe(topic);
             callMap.put(topic, callback);
-            LogUtil.d(TAG, "订阅topic=>"+topic);
+            LogUtil.i(TAG, "订阅topic=>"+topic);
         }
         catch (MqttException e) {
             e.printStackTrace();

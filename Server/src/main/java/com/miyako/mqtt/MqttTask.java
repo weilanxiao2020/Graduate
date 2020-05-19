@@ -6,6 +6,8 @@ import com.miyako.parse.ParseMqtt;
 import com.miyako.utils.LogUtil;
 import com.miyako.utils.ServerApp;
 
+import java.rmi.activation.ActivationGroup;
+
 /**
  * ClassName MqttTask
  * Description //TODO
@@ -42,7 +44,7 @@ public class MqttTask {
     }
 
     private void getCardInfoTest(byte[] data){
-        LogUtil.d(TAG, "getCardInfoTest byte size=>"+data.length);
+        LogUtil.i(TAG, "getCardInfoTest byte size=>"+data.length);
         StringBuilder sb = new StringBuilder();
         for (byte datum : data) {
             LogUtil.d(TAG, String.format("%02x", datum));
@@ -54,7 +56,7 @@ public class MqttTask {
      * @param data 透传的数据
      */
     private void getScanCard(byte[] data) {
-        LogUtil.d(TAG, "getScanCard byte size=>"+data.length);
+        LogUtil.i(TAG, "getScanCard");
         Order order = ParseMqtt.parseRfidMqtt(data);
     }
 
@@ -63,7 +65,7 @@ public class MqttTask {
      * @param data 透传的数据
      */
     private void getCardGps(byte[] data) {
-        LogUtil.d(TAG, "getCardGps byte size=>"+data.length);
+        LogUtil.i(TAG, "getCardGps");
         GPS gps = ParseMqtt.parseGpsMqtt(data);
     }
 }

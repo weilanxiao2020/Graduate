@@ -29,7 +29,7 @@ public class EmptyTask extends BaseTask{
 
     @Override
     public ResBody doTask(){
-        LogUtil.d(TAG, "doTask");
+        LogUtil.i(TAG, "doTask");
         return null;
     }
 }

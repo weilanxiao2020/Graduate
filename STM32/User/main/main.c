@@ -78,7 +78,7 @@ int main(void)
 	Gprs_Init();
 	Gps_Init();
 
-	// Mqtt_Init();
+	Mqtt_Init();
 	
 
 	/*-------------------打印系统信息-------------------*/

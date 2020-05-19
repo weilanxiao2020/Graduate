@@ -52,29 +52,31 @@ public class MySocket{
 
     public void start(){
         try {
-            LogUtil.d(TAG, "server local host: " + server.getLocalSocketAddress() + ":[" + server.getLocalPort() + "]");
-            LogUtil.d(TAG, "server host: " + server.getInetAddress().getHostAddress() + ":[" + server.getLocalPort() + "]");
-            LogUtil.d(TAG, "server start...");
+            LogUtil.i(TAG, "server local host: " + server.getLocalSocketAddress() + ":[" + server.getLocalPort() + "]");
+            LogUtil.i(TAG, "server host: " + server.getInetAddress().getHostAddress() + ":[" + server.getLocalPort() + "]");
+            LogUtil.i(TAG, "server start...");
             running();
         }
         catch (IOException e) {
             e.printStackTrace();
+            LogUtil.e(TAG, "server start error:"+e.getMessage());
         }
     }
 
     private void running() throws IOException{
-        LogUtil.d(TAG, "server running...");
+        LogUtil.i(TAG, "server running...");
         new Thread(new Runnable(){
             @Override
             public void run(){
                 while (true) {
                     try {
                         Socket client = server.accept();
-                        LogUtil.d(TAG, "connected from " + client.getRemoteSocketAddress());
+                        LogUtil.i(TAG, "connected from " + client.getRemoteSocketAddress());
                         connect(client);
                     }
                     catch (IOException e) {
                         e.printStackTrace();
+                        LogUtil.e(TAG, "connected from error:" + e.getMessage());
                     }
                 }
             }
@@ -167,7 +169,7 @@ public class MySocket{
                 }
             }
         } catch (JsonSyntaxException ex) {
-            LogUtil.e(TAG, "request json is error");
+            LogUtil.e(TAG, "request json is error:"+ ex.getMessage());
             ex.printStackTrace();
             head[2] = (byte) (0xff);
             head[3] = (byte) (0xff);
@@ -260,6 +262,7 @@ public class MySocket{
                 }
                 catch (IOException e) {
                     e.printStackTrace();
+                    LogUtil.e(TAG, "socket connect error:"+e.getMessage());
                 }
                 LogUtil.e(TAG, "关闭socket");
             }

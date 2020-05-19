@@ -16,6 +16,6 @@
 
 void Mqtt_Init();
 boolean Mqtt_Status();
-boolean Mqtt_Publish(const char *topic, const char *data, uint16_t len, uint8_t qos);
+void Mqtt_Publish(const char *topic, const char *data, uint16_t len, uint8_t qos);
 
 #endif

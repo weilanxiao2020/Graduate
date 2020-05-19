@@ -42,21 +42,22 @@ public class ParseMqtt{
     private static double convertGps(String val) {
         double res = Double.valueOf(val);
         int temp = (int) res;
-        //LogUtil.d(TAG, "temp:"+temp);
-        //LogUtil.d(TAG, "val:"+(res-temp));
-        //LogUtil.d(TAG, "度:"+(temp/100));
-        //LogUtil.d(TAG, "s:"+(temp%100/60.0));
-        //LogUtil.d(TAG, "d:"+((res-temp) *60  / 3600.0));
+        LogUtil.d(TAG, "temp:"+temp);
+        LogUtil.d(TAG, "val:"+(res-temp));
+        LogUtil.d(TAG, "度:"+(temp/100));
+        LogUtil.d(TAG, "s:"+(temp%100/60.0));
+        LogUtil.d(TAG, "d:"+((res-temp) *60  / 3600.0));
         res = temp/100 + temp%100/60.0 + (res-temp) / 600.0;
         return res;
     }
 
     public static GPS parseGpsMqtt(byte[] data) {
+        LogUtil.d(TAG, "parse Gps Mqtt byte size=>"+data.length);
         GPS gps = null;
         String json = new String(data, StandardCharsets.UTF_8);
         JsonObject object = validateJson(json);  // 转化为对象
         if (object == null) {
-            LogUtil.d(TAG, "接收mqtt消息异常");
+            LogUtil.e(TAG, "接收mqtt消息异常");
             return gps;
         }
         byte code = object.get("code").getAsByte();
@@ -69,11 +70,13 @@ public class ParseMqtt{
         String[] lat_s = latitude.split("-");
         String[] lon_s = longitude.split("-");
         if("x".equals(lat_s[1]) || "x".equals(lon_s[1])) {
-            LogUtil.d(TAG, "gps无效");
+            LogUtil.w(TAG, "gps无效");
             return null;
         }
-        double lat = convertGps(lat_s[0]);
-        double lon = convertGps(lon_s[0]);
+        //double lat = convertGps(lat_s[0]);
+        //double lon = convertGps(lon_s[0]);
+        double lat = Double.parseDouble(lat_s[0]);
+        double lon = Double.parseDouble(lon_s[0]);
         LogUtil.d(TAG, String.format("convert gps:%s,%s",lat,lon));
         gps = new GPS();
         gps.setMissionId(missionId);
@@ -97,59 +100,23 @@ public class ParseMqtt{
             }
         }
 
-        //if (GPSDao.insert(gps) != -1) {
-        //    LogUtil.d(TAG, "mqtt消息处理成功");
-        //} else {
-        //    LogUtil.d(TAG, "mqtt消息处理异常");
-        //    gps = null;
-        //}
+        if (GPSDao.insert(gps) != -1) {
+            LogUtil.d(TAG, "mqtt消息处理成功");
+        } else {
+            LogUtil.d(TAG, "mqtt消息处理异常");
+            gps = null;
+        }
 
-        //if(data[0] != (byte) 0xfe) {
-        //    LogUtil.d(TAG, "接收mqtt消息异常");
-        //    return gps;
-        //} else {
-        //    LogUtil.d(TAG, "解析gps mqtt数据");
-        //    // 得到数据个数
-        //    int len = data[1]&0xff;
-        //    if (len != MQTT_GPS_MSG_HEAD_LEN) {
-        //        LogUtil.d(TAG, "接收gps mqtt长度异常");
-        //        return gps;
-        //    } else {
-        //        int index = MQTT_MSG_HEAD_LEN + MQTT_GPS_MSG_HEAD_LEN;
-        //        int i = MQTT_MSG_HEAD_LEN;
-        //        String missionId = parseData(data, index, data[i++] & 0xff);
-        //        index +=(data[i-1]&0xff);
-        //        String utc = parseData(data, index, data[i++] & 0xff);
-        //        index +=(data[i-1]&0xff);
-        //        String latitude = parseData(data, index, data[i++] & 0xff);
-        //        index +=(data[i-1]&0xff);
-        //        String n_s = parseData(data, index, data[i++] & 0xff);
-        //        index +=(data[i-1]&0xff);
-        //        String longitude = parseData(data, index, data[i++] & 0xff);
-        //        index +=(data[i-1]&0xff);
-        //        String e_w = parseData(data, index, data[i++] & 0xff);
-        //        gps = new GPS();
-        //        gps.setMissionId(missionId);
-        //        gps.setTimestamp(Long.valueOf(utc));
-        //        gps.setLatitude(latitude+n_s);
-        //        gps.setLongitude(longitude+e_w);
-        //        gps.setRegion(MapUtil.gpsParse(Double.valueOf(latitude), Double.valueOf(longitude)));
-        //        //if (GPSDao.insert(gps) != -1) {
-        //        //    LogUtil.d(TAG, "mqtt消息处理成功");
-        //        //} else {
-        //        //    LogUtil.d(TAG, "mqtt消息处理异常");
-        //        //}
-        //    }
-        //}
         return gps;
     }
 
     public static Order parseRfidMqtt(byte[] data) {
+        LogUtil.d(TAG, "parse Rfid Mqtt byte size=>"+data.length);
         Order order = null;
         String json = new String(data, StandardCharsets.UTF_8);
         JsonObject object = validateJson(json);  // 转化为对象
         if (object == null) {
-            LogUtil.d(TAG, "接收mqtt消息异常");
+            LogUtil.e(TAG, "接收mqtt消息异常");
             return order;
         }
         byte code = object.get("code").getAsByte();
@@ -159,7 +126,7 @@ public class ParseMqtt{
         byte status = object.get("status").getAsByte();
         order = OrderDao.findByTrackId(trackId);
         if (order == null) {
-            LogUtil.d(TAG, "查询为空");
+            LogUtil.w(TAG, "查询为空");
             return order;
         }
         if (missionId.equals(order.getMissionId())) {
@@ -173,10 +140,10 @@ public class ParseMqtt{
             if (OrderDao.update(order) != -1) {
                 LogUtil.d(TAG, "mqtt消息处理成功");
             } else {
-                LogUtil.d(TAG, "mqtt消息处理异常");
+                LogUtil.w(TAG, "mqtt消息处理异常");
             }
         } else {
-            LogUtil.d(TAG, "mission数据不符");
+            LogUtil.w(TAG, "mission数据不符");
             return null;
         }
         return order;

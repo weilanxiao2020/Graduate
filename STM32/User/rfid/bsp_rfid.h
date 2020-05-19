@@ -16,11 +16,11 @@
 /*
 				1. GND 电源地
 				2. VCC 电源正（3～5.5V）
-PA1				3. rifd的rst，复位管脚，低电平有效
-PA4(SPI1_NSS)	4. rifd的sda，片选管脚，低电平有效
-PA5(SPI1_SCK)	5. rfid的sck，时钟管脚
-PA6(SPI1_MISO)	6. rfid到stm32，数据引脚
-PA7(SPI1_MOSI)	7. stm32到rfid，数据引脚
+PA1				3. RST,rifd的rst，复位管脚，低电平有效
+PA4(SPI1_NSS)	4. SDA,rifd的sda，片选管脚，低电平有效
+PA5(SPI1_SCK)	5. SCK,rfid的sck，时钟管脚
+PA6(SPI1_MISO)	6. MISO,rfid到stm32，数据引脚
+PA7(SPI1_MOSI)	7. MOSI,stm32到rfid，数据引脚
 */
 
 /*********************************** RC522 引脚定义 *********************************************/

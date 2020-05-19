@@ -15,17 +15,17 @@
 				2. VCC 电源正（3～5.5V）
 PB13(SPI2_SCK)	3. D0 OLED 的 D0 脚，在 SPI 和 IIC 通信中为时钟管脚
 PB15(SPI2_MOSI)	4. D1 OLED 的 D1 脚，在 SPI 和 IIC 通信中为数据管脚
-PB8				5. RES OLED 的 RES#脚，用来复位（低电平复位）
-PB9				6. DC OLED 的 D/C#E 脚，数据和命令控制管脚
+PA8				5. RES OLED 的 RES#脚，用来复位（低电平复位）
+PB14			6. DC OLED 的 D/C#E 脚，数据和命令控制管脚
 PB12(SPI2_NSS)	7. CS OLED 的 CS#脚，也就是片选管脚
 */
 //              GND    电源地
 //              VCC  接5V或3.3v电源
-//              D0   接PA5（SCL）PB->13
-//              D1   接PA7（SDA）PB->15
-//              RES  接PB0
-//              DC   接PB1 
-//              CS   接PA4 PB->12 
+//              D0   接PB->13
+//              D1   接PB->15
+//              RES  接PA->8
+//              DC   接PB->14 
+//              CS   接PB->12 
 
 /* Oled GPIO*/
 

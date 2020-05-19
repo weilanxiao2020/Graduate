@@ -68,7 +68,7 @@ public class OrderDao {
         LogUtil.d(TAG, "insert: "+order);
         Order temp = findByTrackId(order.getTrackId());
         if (temp != null) {
-            LogUtil.d(TAG, "订单唯一标识已存在");
+            LogUtil.w(TAG, "订单唯一标识已存在");
             return -1;
         }
         String[] array = new String[7];
@@ -88,7 +88,7 @@ public class OrderDao {
     public static int update(Order order) {
         LogUtil.d(TAG, "update: "+order);
         if (order.getId()==0) {
-            LogUtil.d(TAG, "数据错误");
+            LogUtil.w(TAG, "数据错误");
             return -1;
         }
 

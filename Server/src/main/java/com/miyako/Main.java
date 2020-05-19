@@ -29,7 +29,7 @@ public class Main {
         try {
             ServerApp.readConfig();
             VerifyUtil.init();
-            //String region = VerifyUtil.verfiyRegion(320105);
+            //String region = VerifyUtil.verfiyRegion(500115);
             //if (region.isEmpty()) {
             //    LogUtil.d(TAG, "校验失败");
             //}else{
@@ -45,7 +45,7 @@ public class Main {
                          ServerApp.MYSQL_USERNAME, ServerApp.MYSQL_PASSWORD, true);
         new MySocket(12345).start(); // 监听指定端口
         new MqttTask().start();
-        LogUtil.d(TAG, "server is running...");
+        LogUtil.i(TAG, "server is running...");
 
         //testMySql();
     }

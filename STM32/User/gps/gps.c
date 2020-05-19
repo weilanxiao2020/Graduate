@@ -50,7 +50,7 @@ void Gps_Data_Parse(void)
 				gpsData->isUsefull = false;
 		} else {
 			gpsData->isParseData = false;
-			Debug_Error(Gps_TAG, "parse gps data error");	//解析错误
+			Debug_Error(Gps_TAG, "parse gps data error");
 		}
 	} else {
 		gpsData->isUsefull = false;

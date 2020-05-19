@@ -56,7 +56,7 @@ public class MissionDao {
         LogUtil.d(TAG, "insert: "+mission);
         Mission temp = findByCard(mission.getLicense() + "-" + mission.getCode());
         if (temp != null) {
-            LogUtil.d(TAG, "任务唯一标识已存在");
+            LogUtil.w(TAG, "任务唯一标识已存在");
             return -1;
         }
         String[] array = new String[5];
@@ -74,7 +74,7 @@ public class MissionDao {
     public static int update(Mission mission) {
         LogUtil.d(TAG, "update: "+mission);
         if (mission.getId()==0) {
-            LogUtil.d(TAG, "数据错误");
+            LogUtil.w(TAG, "数据错误");
             return -1;
         }
 

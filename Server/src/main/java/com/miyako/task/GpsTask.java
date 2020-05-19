@@ -39,7 +39,7 @@ public class GpsTask extends BaseTask{
 
     @Override
     public ResBody doTask(){
-        LogUtil.d(TAG, "doTask");
+        LogUtil.i(TAG, "doTask");
         ResBody<GpsMsg> result;
         switch (getBody().getAsJsonObject().get("code").getAsInt()) {
             case ServerApp.CMD_GPS_READ:

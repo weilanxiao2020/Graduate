@@ -38,7 +38,7 @@ public class OrderTask extends BaseTask{
 
     @Override
     public ResBody doTask(){
-        LogUtil.d(TAG, "doTask");
+        LogUtil.i(TAG, "doTask");
         ResBody<OrderMsg> result = null;
         switch (getBody().getAsJsonObject().get("code").getAsInt()) {
             case ServerApp.CMD_ORDER_READ_BY_TRACK:
