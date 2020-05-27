@@ -42,11 +42,11 @@ public class ParseMqtt{
     private static double convertGps(String val) {
         double res = Double.valueOf(val);
         int temp = (int) res;
-        LogUtil.d(TAG, "temp:"+temp);
-        LogUtil.d(TAG, "val:"+(res-temp));
-        LogUtil.d(TAG, "度:"+(temp/100));
-        LogUtil.d(TAG, "s:"+(temp%100/60.0));
-        LogUtil.d(TAG, "d:"+((res-temp) *60  / 3600.0));
+        //LogUtil.d(TAG, "temp:"+temp);
+        //LogUtil.d(TAG, "val:"+(res-temp));
+        //LogUtil.d(TAG, "度:"+(temp/100));
+        //LogUtil.d(TAG, "s:"+(temp%100/60.0));
+        //LogUtil.d(TAG, "d:"+((res-temp) *60  / 3600.0));
         res = temp/100 + temp%100/60.0 + (res-temp) / 600.0;
         return res;
     }
@@ -62,6 +62,7 @@ public class ParseMqtt{
         }
         byte code = object.get("code").getAsByte();
         LogUtil.d(TAG, String.format("post code:0x%02x",code));
+        byte type = object.get("type").getAsByte();
         String missionId = object.get("mission").getAsString();
         String latitude = object.get("latitude").getAsString();
         String longitude = object.get("longitude").getAsString();
@@ -73,10 +74,16 @@ public class ParseMqtt{
             LogUtil.w(TAG, "gps无效");
             return null;
         }
-        //double lat = convertGps(lat_s[0]);
-        //double lon = convertGps(lon_s[0]);
-        double lat = Double.parseDouble(lat_s[0]);
-        double lon = Double.parseDouble(lon_s[0]);
+        double lat = 0;
+        double lon = 0;
+        if(type==0x01) {
+            lat = convertGps(lat_s[0]);
+            lon = convertGps(lon_s[0]);
+        } else if(type==0x02) {
+            lat = Double.parseDouble(lat_s[0]);
+            lon = Double.parseDouble(lon_s[0]);
+        }
+
         LogUtil.d(TAG, String.format("convert gps:%s,%s",lat,lon));
         gps = new GPS();
         gps.setMissionId(missionId);
@@ -85,15 +92,16 @@ public class ParseMqtt{
         gps.setLongitude(lon+lon_s[1]);
         if (!intervalMap.containsKey(missionId)) {
             intervalMap.put(missionId, System.currentTimeMillis());
-            gps.setRegion(MapUtil.gpsParse(lat, lon));
             regionMap.put(missionId, gps.getRegion());
+            gps.setRegion(MapUtil.gpsParse(lat, lon));
         } else {
             long diff = gps.getTimestamp() - intervalMap.get(missionId);
             LogUtil.d(TAG, "diff:"+diff);
             if(diff / (spanTime)> span) {
                 // 时间间隔达到阈值，更新gps区域
-                gps.setRegion(MapUtil.gpsParse(lat,lon));
+                intervalMap.put(missionId, System.currentTimeMillis());
                 regionMap.put(missionId, gps.getRegion());
+                gps.setRegion(MapUtil.gpsParse(lat,lon));
             } else {
                 // 时间间隔未达到阈值
                 gps.setRegion(regionMap.get(missionId));

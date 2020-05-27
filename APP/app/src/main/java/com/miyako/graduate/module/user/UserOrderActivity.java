@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.Observable;
 import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.internal.schedulers.IoScheduler;
 import io.reactivex.schedulers.Schedulers;
 
@@ -54,6 +55,7 @@ public class UserOrderActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate...");
         setContentView(R.layout.activity_user_order);
         initView(savedInstanceState);
         initValue();
@@ -69,12 +71,17 @@ public class UserOrderActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         //在activity执行onDestroy时执行mMapView.onDestroy()，销毁地图
+        Log.d(TAG, "onDestroy...");
+        if (subscribe != null) {
+            subscribe.dispose();
+        }
         mMapView.onDestroy();
         MapUtil.getInstance().cancelLocation();
     }
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d(TAG, "onResume...");
         //在activity执行onResume时执行mMapView.onResume ()，重新绘制加载地图
         mMapView.onResume();
         getGpsLast();
@@ -84,11 +91,13 @@ public class UserOrderActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        Log.d(TAG, "onPause...");
         // TODO Auto-generated method stub
         //在activity执行onPause时执行mMapView.onPause ()，暂停地图的绘制
         mMapView.onPause();
         //mLocationClient.stopLocation();//停止定位
     }
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -142,12 +151,12 @@ public class UserOrderActivity extends AppCompatActivity {
     }
 
     int inter = 10;
-
+    private Disposable subscribe;
     private void getGpsLast() {
-        Observable.interval(0, inter, TimeUnit.SECONDS)
+        subscribe = Observable.interval(0, inter, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(s->{
+                .subscribe(s -> {
                     if (flag) {
                         SocketManager.getInstance()
                                 .getOrderGpsLast(mission, new SocketManager.ISocketCall() {
@@ -157,8 +166,8 @@ public class UserOrderActivity extends AppCompatActivity {
                                         GpsMsg last = (GpsMsg) msg.get(0);
                                         GpsOrder order = convert(last);
                                         long utcTime = mAdapter.getItem(0).getUtcTime();
-                                        Log.d(TAG, "上次gps时间:"+utcTime);
-                                        Log.d(TAG, "本次gps时间:"+order.getUtcTime());
+                                        Log.d(TAG, "上次gps时间:" + utcTime);
+                                        Log.d(TAG, "本次gps时间:" + order.getUtcTime());
                                         LatLng latLng = convertLatLng(order);
                                         mLastLatLng = latLng;
                                         if (order.getUtcTime() > utcTime) {
@@ -200,8 +209,8 @@ public class UserOrderActivity extends AppCompatActivity {
 
     // 定位回调
     public void getLocation(LatLng latLng) {
-        Log.d(TAG, "getLocation:"+latLng);
-        Log.d(TAG, "lastLocation:"+mLastLatLng);
+        Log.d(TAG, "get user location:"+latLng);
+        Log.d(TAG, "get order last location:"+mLastLatLng);
         float distance = AMapUtils.calculateLineDistance(latLng, mLastLatLng);
         Log.d(TAG, "直线距离:"+distance);
         showDistance(distance);

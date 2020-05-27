@@ -2,6 +2,7 @@
 #define __GPS_H
 
 #include "bsp_gps.h"
+#include "bsp_tim.h"
 
 #ifdef GZ_DEBUG
     #define Gps_TAG       "gps"

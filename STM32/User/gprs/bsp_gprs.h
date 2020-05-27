@@ -51,7 +51,7 @@ PA3(USART2_RX)	4. tx 数据发送，接stm32的rx
 #define GPRS_USART_IRQHandler          USART2_IRQHandler
 
 #define STR_END         "\r\n"          // 字符发送结束符
-#define Buffer_Max      128                // 接收缓冲区大小
+#define Buffer_Max      256                // 接收缓冲区大小
 
 /* 初始化串口 */
 void Gprs_Gpio_Init(void);

@@ -33,6 +33,7 @@ void Gps_Data_Parse(void)
 	char usefullBuffer[2];
 	if (gpsData->isGetData)
 	{
+		uint64_t startTime = Tim2_Time_Stamp();
 		gpsData->isGetData = false;
         Debug_Info(Gps_TAG, "start parse gps data");
         Debug_Info(Gps_TAG, gpsData->GPS_Buffer);
@@ -52,6 +53,7 @@ void Gps_Data_Parse(void)
 			gpsData->isParseData = false;
 			Debug_Error(Gps_TAG, "parse gps data error");
 		}
+		Debug_Info(Gps_TAG, "GPS操作耗时:%ld",(Tim2_Time_Stamp() - startTime));
 	} else {
 		gpsData->isUsefull = false;
 	}

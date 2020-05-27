@@ -67,8 +67,7 @@ void TIM2_IRQHandler(void)
         _time_stamp_++;
         if((_1ms_cnt%50)==0) {
             tim2_50ms_flag = 1;
-            Key_Scan();
-
+            // Key_Scan();
         }
 
         if(_1ms_cnt==1000)

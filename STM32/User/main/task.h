@@ -27,6 +27,7 @@ void Task_Mqtt_Gps(void);
 char *Task_Mqtt_Status(void);
 char *Task_Rfid_Status(void);
 char *Task_Gps_Status(void);
+void Task_Get_Mission(void);
 
 uint16_t Mqtt_Rfid_Data_Build(const RfidType *data, uint8_t len, char *buf);
 

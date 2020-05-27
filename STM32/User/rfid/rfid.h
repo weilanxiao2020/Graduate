@@ -7,6 +7,7 @@
 #include "debug.h"
 #include "constants.h"
 #include "common.h"
+#include "bsp_tim.h"
 
 #ifdef GZ_DEBUG
     #define Rfid_TAG    "rfid"

@@ -55,6 +55,7 @@ void Mqtt()
 extern volatile uint8_t cmd_task;
 extern char Data_Buf[Debug_Rx_Length];
 extern uint8_t dataLen;
+
 int main(void)
 {
 	char cmdBuf[16];
@@ -69,7 +70,7 @@ int main(void)
 	Tim2_Callback_Init();
 	Tim2_Start();
 	// Tim2_Callback_Add(Task_Status);
-	Key_Init();
+	// Key_Init();
 	Oled_Init();
     Led_Init();
 	Task_Status();
@@ -79,12 +80,13 @@ int main(void)
 	Gps_Init();
 
 	Mqtt_Init();
+	Tim2_Callback_Add(Task_Get_Mission);
 	
 
 	/*-------------------打印系统信息-------------------*/
 	Debug_Error(Main_TAG, "GraduationProject");
 	Debug_Error(Main_TAG, "魏蓝骁");
-	Debug_Error(Main_TAG, "2016212677");
+	Debug_Error(Main_TAG, "学号:2016212677");
 
 	/*-------------------模块功能准备-------------------*/
 	//Oled_Display_On();
@@ -93,6 +95,7 @@ int main(void)
 	
 	// E2prom_Write_Byte(0xA2, 8, 0x26);
 	// Debug_Info(Main_TAG, "eeprom write ok");
+
 
 	while(1)
 	{	

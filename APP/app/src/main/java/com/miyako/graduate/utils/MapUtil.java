@@ -241,6 +241,7 @@ public class MapUtil {
 
     public MapUtil cancelLocation() {
         mLocationClient.onDestroy();//销毁定位客户端。
+        mMap = null;
         return this;
     }
 

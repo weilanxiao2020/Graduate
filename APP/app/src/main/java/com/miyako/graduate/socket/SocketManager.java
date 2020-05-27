@@ -32,8 +32,8 @@ public class SocketManager {
     private static final String TAG = SocketManager.class.getSimpleName();
 
     //连接参数设置(IP,端口号),这也是一个连接的唯一标识,不同连接,该参数中的两个值至少有其一不一样
-//    private String serverIp = "123.57.243.5";
-    private String serverIp = "192.168.25.201";
+    private String serverIp = "123.57.243.5";
+//    private String serverIp = "192.168.25.201";
 
     private static final class Obj {
         private static final SocketManager obj = new SocketManager();

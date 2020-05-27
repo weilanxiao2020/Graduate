@@ -12,6 +12,7 @@ import com.miyako.result.msg.MissionMsg;
 import com.miyako.result.msg.QueryMsg;
 import com.miyako.utils.LogUtil;
 import com.miyako.utils.ServerApp;
+import com.miyako.utils.VerifyUtil;
 
 import java.util.Collections;
 
@@ -64,6 +65,7 @@ public class MissionTask extends BaseTask{
                                  ServerApp.RESPONSE_ERROR + getAddress());
         }
         MissionMsg missionMsg = ParseDao.missionToMissionMsg(mission);
+        missionMsg.setAddress(VerifyUtil.verfiyRegion(Integer.valueOf(missionMsg.getAddress())));
         ResBody<MissionMsg> resBody = new ResBody<>(ServerApp.CMD_MISSION_READ, System.currentTimeMillis(),
                                                 ServerApp.RESPONSE_SUCCESS + getAddress());
         resBody.setData(Collections.singletonList(missionMsg));

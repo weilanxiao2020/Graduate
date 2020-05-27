@@ -363,6 +363,7 @@ boolean Rfid_WR_Datas(uint8_t cardType, byte *pDatas, const CardMap *maps, uint8
 				// 认证
 				// 校验1扇区密码，密码位于每一扇区第3块，验证A密钥，块地址，扇区密码，卡序列号
 				int i;
+				uint64_t startTime = Tim2_Time_Stamp();
 				for(i=0;i<length;i++)
 				{
 					sector = (*(maps+i)&0xf0)>>4;
@@ -391,6 +392,7 @@ boolean Rfid_WR_Datas(uint8_t cardType, byte *pDatas, const CardMap *maps, uint8
 				{
 					Debug_Info(Rfid_TAG, "读写所有数据成功");
 					// delay_ms(1000);
+					Debug_Info(Rfid_TAG, "Rfid操作耗时:%ld", (Tim2_Time_Stamp() - startTime));
 					if(isWait) {
 						Pcd_Wait_Card_Off();
 						Debug_Info(Rfid_TAG, "等待卡片离开");

@@ -76,6 +76,7 @@ void Mqtt_Publish(const char *topic, const char *data, uint16_t len, uint8_t qos
     boolean flag;
 	uint8_t cnt=0;
 	char *str = NULL;
+	uint64_t startTime = Tim2_Time_Stamp();
 	Gprs_Clear_Buffer();
 	Debug_Info(Mqtt_TAG, "wait mqtt publish");
 	str = (char*) calloc(85, sizeof(char));
@@ -93,5 +94,6 @@ void Mqtt_Publish(const char *topic, const char *data, uint16_t len, uint8_t qos
 	} else {
 		Debug_Info(Mqtt_TAG, "publish error");
 	}
+	Debug_Info(Mqtt_TAG, "Mqtt cost time:%ld", (Tim2_Time_Stamp() - startTime));
 	free(str);
 }

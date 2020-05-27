@@ -3,6 +3,7 @@
 
 #include "gprs.h"
 #include "oled.h"
+#include "bsp_tim.h"
 
 #ifdef GZ_DEBUG
     #define Mqtt_TAG       "mqtt"

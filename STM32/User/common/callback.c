@@ -84,8 +84,11 @@ void Tim2_Handler_Callback(void)
             _10s_ = 0;
         }        
         tim2_1s_flag = 0;
+
     }
 }
+
+
 
 void Tim2_Callback()
 {

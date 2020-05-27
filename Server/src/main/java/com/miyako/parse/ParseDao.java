@@ -21,7 +21,7 @@ public class ParseDao{
     // gpsmsg为utc时间
     public static GpsMsg gpsToGpsMsg(GPS gps){
         GpsMsg gpsMsg = new GpsMsg();
-        LogUtil.d(TAG, "GPS -> GpsMsg");
+        //LogUtil.i(TAG, "GPS -> GpsMsg");
         if (gps == null) {
             gpsMsg.setId(0);
             gpsMsg.setUtcTime("0");
@@ -48,7 +48,7 @@ public class ParseDao{
     // gpsmsg为utc时间
     public static GPS gpsMsgToGps(GpsMsg gpsMsg){
         GPS gps = new GPS();
-        LogUtil.d(TAG, "GpsMsg -> GPS");
+        //LogUtil.i(TAG, "GpsMsg -> GPS");
         gps.setMissionId(gpsMsg.getMissionId());
         gps.setTimestamp(Long.valueOf(gpsMsg.getUtcTime()));
         gps.setLatitude(gpsMsg.getLatitude()+gpsMsg.getN_S());
@@ -63,7 +63,7 @@ public class ParseDao{
     }
 
     public static MissionMsg missionToMissionMsg(Mission mission){
-        LogUtil.d(TAG, "Mission -> MissionMsg");
+        //LogUtil.i(TAG, "Mission -> MissionMsg");
         MissionMsg missionMsg = new MissionMsg();
 
         missionMsg.setMissionId(missionId2LicenseCode(mission.getLicense(), mission.getCode()));
@@ -75,7 +75,7 @@ public class ParseDao{
     }
 
     public static OrderMsg orderToOrderMsg(Order order){
-        LogUtil.d(TAG, "order -> OrderMsg");
+        //LogUtil.i(TAG, "order -> OrderMsg");
         OrderMsg orderMsg = new OrderMsg();
 
         orderMsg.setTrackId(order.getTrackId());

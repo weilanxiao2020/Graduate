@@ -88,17 +88,17 @@ void Task_Rfid_Scan_Test(void)
     sprintf(task_line3, "%s", "status error");
     Oled_Show_String(0,OLED_LINE3,task_line3);
 
-    // char *buf = (char*)calloc(256,sizeof(char));
-    // sprintf(task_line2, "%s", "945613574452475");
-	// Oled_Show_String(0,OLED_LINE2,task_line2);
-    // sprintf(task_line3, "%s", "success");
-    // Oled_Show_String(0,OLED_LINE3,task_line3);
-    // sprintf(buf, RFID_MQTT_STR, 0xf1, mission, "945613574452475", 0x01);
-    // Debug_Info(Task_TAG, "%s=>%s已装车，目的地:%s，状态:0x%02x", 
-    //             mission, "945613574452475", 
-    //             "110106", 0x01);
-    // Debug_Info(Task_TAG, "mqtt data:");
-    // Mqtt_Publish(Topic_Card_Scan_Post, buf, strlen(buf),0);
+    char *buf = (char*)calloc(256,sizeof(char));
+    sprintf(task_line2, "%s", "945613574452475");
+	Oled_Show_String(0,OLED_LINE2,task_line2);
+    sprintf(task_line3, "%s", "success");
+    Oled_Show_String(0,OLED_LINE3,task_line3);
+    sprintf(buf, RFID_MQTT_STR, 0xf1, mission, "945613574452475", 0x01);
+    Debug_Info(Task_TAG, "%s=>%s已装车，目的地:%s，状态:0x%02x", 
+                mission, "945613574452475", 
+                "110106", 0x01);
+    Debug_Info(Task_TAG, "mqtt data:");
+    Mqtt_Publish(Topic_Card_Scan_Post, buf, strlen(buf),0);
 }
 #endif
 
@@ -107,6 +107,43 @@ uint8_t cardCnt =0;
 void Task_Sys_Show(void)
 {
     Task_Status();
+}
+
+char card_mission[17] = "123456789-416421";
+char mission_temp[17];
+int car_Id;
+
+char mqtt_buf[256];
+char mqtt_data[128];
+const char* GET_MISSION_MQTT_STR = "{\"carId\":%d,\"mission\":\"%[^\"]\"}";
+void Task_Get_Mission(void)
+{
+    int i, len;
+
+    // Debug_Info(Task_TAG, "get sub");
+    if(Find_Str(Gprs_Get_Buffer(), "+STATUS: MQTT CONNECT OK\r\n\r\nOK\r\n\r\ntopic"))  {          //查找需要应答的字符串ack
+        memcpy(mqtt_buf, Gprs_Get_Buffer(),256);
+        Gprs_Clear_Buffer();
+        Debug_Info(Task_TAG, "sub:%s",mqtt_buf);
+        i = sscanf(mqtt_buf, "\r\n+STATUS: MQTT CONNECT OK\r\n\r\nOK\r\n\r\ntopic: /a1Tdu6Ry02R/graduate_node_1/user/card_mission_get,%d\r\n%s", &len,mqtt_data);
+    } else if(Find_Str(Gprs_Get_Buffer(), "topic:")) {
+        memcpy(mqtt_buf, Gprs_Get_Buffer(),256);
+        Gprs_Clear_Buffer();
+        Debug_Info(Task_TAG, "sub:%s",mqtt_buf);
+        i = sscanf(mqtt_buf, "\r\ntopic: /a1Tdu6Ry02R/graduate_node_1/user/card_mission_get,%d\r\n%s", &len,mqtt_data);
+    } else {
+        return;
+    }
+    Debug_Info(Task_TAG, "len:%d, data:%s",i, mqtt_data);
+    sscanf(mqtt_data,GET_MISSION_MQTT_STR, &car_Id, mission_temp);
+    Debug_Info(Task_TAG, "carId:%d, mission:%s", car_Id, mission_temp);
+    if(car_Id!=123) {
+        Debug_Info(Task_TAG, "carId error,mission:%s",card_mission);
+    } else {
+        sprintf(card_mission,"%s",mission_temp);
+    }
+    Buf_Clear(mqtt_buf,256);
+    Buf_Clear(mqtt_data,128);
 }
 
 void Task_Rfid_Scan(void)
@@ -118,7 +155,7 @@ void Task_Rfid_Scan(void)
     {
         Task_Status();
         // 显示mission
-        sprintf(task_line1, "%s", mission);
+        sprintf(task_line1, "%s", card_mission);
         Oled_Show_String(0,OLED_LINE1,task_line1);
         Oled_Show_String(0,OLED_LINE2,"...");
         #ifdef Test
@@ -133,7 +170,7 @@ void Task_Rfid_Scan(void)
         // 显示trackId
         sprintf(task_line2, "%s", data->data.trackId);
         Oled_Show_String(0,OLED_LINE2,task_line2);
-        sscanf(mission, "%[^-]-%[^-]", cmp, cmp+9);
+        sscanf(card_mission, "%[^-]-%[^-]", cmp, cmp+9);
         Debug_Info(Task_TAG, "mission:%s",data->data.missionId);
         if(strcmp(data->data.missionId, cmp)!=0) {
             sprintf(task_line3, "%s", "error");
@@ -164,7 +201,7 @@ void Task_Rfid_Scan(void)
                 Debug_Info(Task_TAG, "rfid写入错误");   
             }
             Debug_Info(Task_TAG, "mqtt data:%s",buf);
-            // Mqtt_Publish(Topic_Card_Scan_Post, buf, strlen(buf),1);
+            Mqtt_Publish(Topic_Card_Scan_Post, buf, strlen(buf),1);
             free(buf);
         }
         cardCnt++;
@@ -194,7 +231,7 @@ void Task_Rfid_Write(const char *data)
 			Debug_Info(Task_TAG, "trackId:%s",model.trackId);
 			Debug_Info(Task_TAG, "address:%s",model.address);
 			Debug_Info(Task_TAG, "status:0x%02x",model.status);
-            sscanf("123456789-416421", "%[^-]-%[^-]", model.missionId, (model.missionId)+9);
+            sscanf(card_mission, "%[^-]-%[^-]", model.missionId, (model.missionId)+9);
             // strcpy(model->missionId, "461237889541354");
             Debug_Info(Task_TAG, "mission:%s",model.missionId);
 			rfid->data = model;
