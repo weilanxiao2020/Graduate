@@ -23,7 +23,7 @@ void delay_us(uint32_t us);
 #define RUN 0x04
 #define OUT 0x08
 
-#define CMD_SYS_S       0x01
+#define CMD_MQTT_G      0x01
 
 #define CMD_RFID_R      0x10
 #define CMD_RFID_W      0x11

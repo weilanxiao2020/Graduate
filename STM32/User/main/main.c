@@ -79,8 +79,8 @@ int main(void)
 	Gprs_Init();
 	Gps_Init();
 
-	Mqtt_Init();
-	Tim2_Callback_Add(Task_Get_Mission);
+	// Mqtt_Init();
+	// Tim2_Callback_Add(Task_Get_Mission);
 	
 
 	/*-------------------打印系统信息-------------------*/
@@ -102,10 +102,11 @@ int main(void)
 		Tim2_Handler_Callback();
 		switch (cmd_task)
 		{
-			case CMD_SYS_S:
+			case CMD_MQTT_G:
 				Debug_Info(Main_TAG, Data_Buf); 
-				Debug_Info(Main_TAG, "更新状态");
-				Task_Sys_Show();
+				Debug_Info(Main_TAG, "获取MQTT");
+				// Task_Sys_Show();
+				Task_Mqtt_Get();
 				cmd_task = 0x00;
 				break;
 			case CMD_RFID_R:

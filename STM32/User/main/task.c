@@ -20,6 +20,14 @@ void Task_Status(void)
     sprintf(task_line0, "E:%s   G:%s   R:%s", Task_Mqtt_Status(),Task_Gps_Status(), Task_Rfid_Status());
     Oled_Clear();
     Oled_Show_String(0,OLED_LINE0,task_line0);
+    if(_task.sys_s!=On) {
+        Oled_Show_String(0,2,"none");
+        return;
+    }
+    if(_task.mqtt_s==On) {
+        Oled_Show_String(0,2,"wait...");
+        return;
+    }
     if(_task.rfid_s==0x00) {
         Oled_Show_String(0,2,"running...");
         if(_task.mqtt_s==0xf0) Oled_Show_String(0,2,"restart...");
@@ -120,7 +128,7 @@ void Task_Get_Mission(void)
 {
     int i, len;
 
-    // Debug_Info(Task_TAG, "get sub");
+    Debug_Info(Task_TAG, "get sub");
     if(Find_Str(Gprs_Get_Buffer(), "+STATUS: MQTT CONNECT OK\r\n\r\nOK\r\n\r\ntopic"))  {          //查找需要应答的字符串ack
         memcpy(mqtt_buf, Gprs_Get_Buffer(),256);
         Gprs_Clear_Buffer();
@@ -144,6 +152,9 @@ void Task_Get_Mission(void)
     }
     Buf_Clear(mqtt_buf,256);
     Buf_Clear(mqtt_data,128);
+    _task.mqtt_s = Off;
+    _task.sys_s = Off;
+    Tim2_Callback_Remove(Task_Get_Mission);
 }
 
 void Task_Rfid_Scan(void)
@@ -171,7 +182,7 @@ void Task_Rfid_Scan(void)
         sprintf(task_line2, "%s", data->data.trackId);
         Oled_Show_String(0,OLED_LINE2,task_line2);
         sscanf(card_mission, "%[^-]-%[^-]", cmp, cmp+9);
-        Debug_Info(Task_TAG, "mission:%s",data->data.missionId);
+        Debug_Info(Task_TAG, "mission:%s",cmp);
         if(strcmp(data->data.missionId, cmp)!=0) {
             sprintf(task_line3, "%s", "error");
             Oled_Show_String(0,OLED_LINE3,task_line3);
@@ -184,7 +195,6 @@ void Task_Rfid_Scan(void)
             Debug_Info(Task_TAG, "trackId:%s",data->data.trackId);
             sprintf(task_line3, "%s", "status error");
             Oled_Show_String(0,OLED_LINE3,task_line3);
-            delay_ms(2000);
         } else {
             char *buf = (char*)calloc(256,sizeof(char));
             sprintf(task_line3, "%s", "success,exit");
@@ -204,6 +214,7 @@ void Task_Rfid_Scan(void)
             Mqtt_Publish(Topic_Card_Scan_Post, buf, strlen(buf),1);
             free(buf);
         }
+        delay_ms(2000);
         cardCnt++;
         Debug_Info(Task_TAG, "scan card cnt:%d", cardCnt);
         #endif
@@ -217,11 +228,12 @@ void Task_Rfid_Write(const char *data)
 	RfidType *rfid = (RfidType *)calloc(1, sizeof(RfidType));
 	Model model;
 	uint8_t len;
+    char temp[17];
     _task.rfid_s = 0x01;
     Task_Status();
 	Debug_Info(Task_TAG, "开始写数据");
-	len = sscanf(data, "%[^,],%[^,],0x%02x", &(model.trackId), &(model.address), &(model.status));
-	if(len!=3) {
+	len = sscanf(data, "%[^,],%[^,],%[^,],0x%02x", temp, &(model.trackId), &(model.address), &(model.status));
+	if(len!=4) {
 		Debug_Info(Task_TAG, "输入数据格式错误");
 	} else {
 		if(strlen(model.trackId)>Model_TrackId_Len ||
@@ -231,7 +243,7 @@ void Task_Rfid_Write(const char *data)
 			Debug_Info(Task_TAG, "trackId:%s",model.trackId);
 			Debug_Info(Task_TAG, "address:%s",model.address);
 			Debug_Info(Task_TAG, "status:0x%02x",model.status);
-            sscanf(card_mission, "%[^-]-%[^-]", model.missionId, (model.missionId)+9);
+            sscanf(temp, "%[^-]-%[^-]", model.missionId, (model.missionId)+9);
             // strcpy(model->missionId, "461237889541354");
             Debug_Info(Task_TAG, "mission:%s",model.missionId);
 			rfid->data = model;
@@ -252,6 +264,15 @@ void Task_Mqtt_Pub(void)
     _task.rfid_s = 0x00;
     Task_Status();
     Debug_Info(Task_TAG, "Mqtt Pub");
+}
+
+// 获取Mqtt
+void Task_Mqtt_Get(void)
+{
+    _task.rfid_s = 0x00;
+    Task_Status();
+    Tim2_Callback_Add(Task_Get_Mission);
+    Debug_Info(Task_TAG, "Mqtt Get");
 }
 
 volatile uint16_t _gps_cnt;
@@ -276,13 +297,19 @@ void Task_Mqtt_Gps()
         sprintf(lon, "%s-%s",data->longitude, data->E_W);
         sprintf(buf, GPS_MQTT_STR, 0xf1, mission, lat, lon);
         Debug_Info(Task_TAG, "mqtt data:%s",buf);
+        // Mqtt_Publish(Topic_Card_Gps_Post, buf, strlen(buf),0);
     } else {
         sprintf(lat, "%s-%s","none", "x");
         sprintf(lon, "%s-%s","none", "x");
         sprintf(buf, GPS_MQTT_STR, 0xf1, mission, lat, lon);
         Debug_Info(Task_TAG, "mqtt data:%s",buf);
-        // Mqtt_Publish(Topic_Card_Gps_Post, buf, strlen(buf),0);
     }
+    sprintf(task_line1, "%s", "gps data:");
+    Oled_Show_String(0,OLED_LINE1,task_line1);
+    sprintf(task_line2, "%s:%s", "lat", lat);
+    sprintf(task_line3, "%s:%s", "lng", lon);
+    Oled_Show_String(0,OLED_LINE2, task_line2);
+    Oled_Show_String(0,OLED_LINE3, task_line3);
     // Mqtt_Publish(Topic_Card_Gps_Post, buf, strlen(buf),0);
 
 }

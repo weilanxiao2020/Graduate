@@ -71,7 +71,7 @@ void Tim2_Handler_Callback(void)
 {
     // 50ms回调
     if(tim2_50ms_flag==1) {
-        // Key_Scan();
+        Key_Scan();
         tim2_50ms_flag = 0;
     }
     // 1s回调

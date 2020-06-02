@@ -30,13 +30,14 @@ void Key_Scan(void)
 	flag = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0);
     if(flag==0) {
         if((_keyType.key_flag&KEY1)==KEY1) {
-            Debug_Info(Bsp_Key_TAG, "按键1未释放");
+            // Debug_Info(Bsp_Key_TAG, "按键1未释放");
         } else {
             _keyType.key_flag |= KEY1;
             Debug_Info(Bsp_Key_TAG, "按键1按下");
-            Debug_Info(Bsp_Key_TAG, "显示状态");
+            Debug_Info(Bsp_Key_TAG, "获取mqtt");
+            _task.mqtt_s = On;
             _task.sys_s = On;
-            cmd_task = CMD_SYS_S;
+            cmd_task = CMD_MQTT_G;
         }
     } else {
         _keyType.key_flag &= 0xfe;
@@ -45,17 +46,19 @@ void Key_Scan(void)
     flag = GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_0);
     if(flag==0) {
         if((_keyType.key_flag&KEY2)==KEY2) {
-            Debug_Info(Bsp_Key_TAG, "按键2未释放");
+            // Debug_Info(Bsp_Key_TAG, "按键2未释放");
         } else {
             _keyType.key_flag |= KEY2;
             Debug_Info(Bsp_Key_TAG, "按键2按下");
             if(_task.gps_s == Off) {
                 Debug_Info(Bsp_Key_TAG, "gps开启");
                 _task.gps_s = On;
+                _task.sys_s = On;
                 cmd_task = CMD_GPS_S;
             } else {
                 Debug_Info(Bsp_Key_TAG, "gps关闭");
                 _task.gps_s = Off;
+                _task.sys_s = Off;
                 cmd_task = CMD_GPS_E;
             }
         }
@@ -66,13 +69,14 @@ void Key_Scan(void)
     flag = GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_1);
     if(flag==0) {
         if((_keyType.key_flag&KEY3)==KEY3) {
-            Debug_Info(Bsp_Key_TAG, "按键3未释放");
+            // Debug_Info(Bsp_Key_TAG, "按键3未释放");
         } else {
             _keyType.key_flag |= KEY3;
             Debug_Info(Bsp_Key_TAG, "按键3按下");
             if(_task.rfid_s == Off) {
                 Debug_Info(Bsp_Key_TAG, "rfid开启");
                 _task.rfid_s = On;
+                _task.sys_s = On;
                 cmd_task = CMD_RFID_R;
             } else {
                  Debug_Info(Bsp_Key_TAG, "rfid已开启");
@@ -85,13 +89,14 @@ void Key_Scan(void)
     flag = GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_2);
     if(flag==0) {
         if((_keyType.key_flag&KEY4)==KEY4) {
-            Debug_Info(Bsp_Key_TAG, "按键4未释放");
+            // Debug_Info(Bsp_Key_TAG, "按键4未释放");
         } else {
             _keyType.key_flag |= KEY4;
             Debug_Info(Bsp_Key_TAG, "按键4按下");
             if(_task.rfid_s == On) {
                 Debug_Info(Bsp_Key_TAG, "rfid关闭");
                 _task.rfid_s = Off;
+                _task.sys_s = Off;
                 cmd_task = CMD_RFID_E;
             } else {
                 Debug_Info(Bsp_Key_TAG, "rfid未开启");
