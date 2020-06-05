@@ -1,15 +1,4 @@
 //////////////////////////////////////////////////////////////////////////////////	 
-//本程序只供学习使用，未经作者许可，不得用于其它任何用途
-//中景园电子
-//店铺地址：http://shop73023976.taobao.com/?spm=2013.1.0.0.M4PqC2
-//
-//  文 件 名   : main.c
-//  版 本 号   : v2.0
-//  作    者   : HuangKai
-//  生成日期   : 2014-0101
-//  最近修改   : 
-//  功能描述   : OLED 4接口演示例程(51系列)
-//              说明: 
 //              ----------------------------------------------------------------
 //              GND    电源地
 //              VCC  接5V或3.3v电源
@@ -19,13 +8,6 @@
 //              DC   接PB1
 //              CS   接PA4               
 //              ----------------------------------------------------------------
-// 修改历史   :
-// 日    期   : 
-// 作    者   : HuangKai
-// 修改内容   : 创建文件
-//版权所有，盗版必究。
-//Copyright(C) 中景园电子2014/3/16
-//All rights reserved
 //******************************************************************************/
 
 #include "oled.h"
@@ -136,6 +118,38 @@ void Oled_Show_String(uint8_t x, uint8_t y, uint8_t *chr)
 		if(x>120){x=0;y+=2;}
 			j++;
 	}
+}
+
+uint8_t* white = "                ";
+void Oled_Show_Line0(const uint8_t* data) 
+{
+	uint8_t line[16]={0};
+	sprintf(line, "%s", data);
+	Oled_Show_String(0, OLED_LINE0, white);
+	Oled_Show_String(0, OLED_LINE0, line);
+}
+
+void Oled_Show_Line1(const uint8_t* data) 
+{
+	uint8_t line[16]={0};
+	sprintf(line, "%s", data);
+	Oled_Show_String(0, OLED_LINE1, white);
+	Oled_Show_String(0, OLED_LINE1, line);
+}
+void Oled_Show_Line2(const uint8_t* data) 
+{
+	uint8_t line[16]={0};
+	sprintf(line, "%s", data);
+	Oled_Show_String(0, OLED_LINE2, white);
+	Oled_Show_String(0, OLED_LINE2, line);
+}
+
+void Oled_Show_Line3(const uint8_t* data) 
+{
+	uint8_t line[16]={0};
+	sprintf(line, "%s", data);
+	Oled_Show_String(0, OLED_LINE3, white);
+	Oled_Show_String(0, OLED_LINE3, line);
 }
 //显示汉字
 void Oled_Show_Chinese(uint8_t x, uint8_t y, uint8_t no)

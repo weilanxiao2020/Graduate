@@ -60,6 +60,7 @@ boolean Gprs_Restart()
 		flag = Gprs_Write_AT_Cmd("AT+CFUN=1,1", "AT Ready",1,2500);
 		if(flag) return true;
 		else cnt++;
+		Gprs_Clear_Buffer();
 	}
 	return false;
 }
@@ -78,6 +79,8 @@ boolean Gprs_Wait_Net()
 		flag = Find_Str(buf, "+NITZ");
 		if(flag) return true;
 		else cnt++;
+		Gprs_Clear_Buffer();
+
 	}
 	return false;
 }
@@ -93,6 +96,8 @@ boolean Gprs_Ok()
 		flag = Gprs_Write_AT_Cmd("AT+CPIN?", "READY",3,500);
 		if(flag) return true;
 		else cnt++;
+		Gprs_Clear_Buffer();
+
 	}
 	return false;
 }

@@ -92,16 +92,16 @@ public class ParseMqtt{
         gps.setLongitude(lon+lon_s[1]);
         if (!intervalMap.containsKey(missionId)) {
             intervalMap.put(missionId, System.currentTimeMillis());
-            regionMap.put(missionId, gps.getRegion());
             gps.setRegion(MapUtil.gpsParse(lat, lon));
+            regionMap.put(missionId, gps.getRegion());
         } else {
             long diff = gps.getTimestamp() - intervalMap.get(missionId);
             LogUtil.d(TAG, "diff:"+diff);
             if(diff / (spanTime)> span) {
                 // 时间间隔达到阈值，更新gps区域
                 intervalMap.put(missionId, System.currentTimeMillis());
-                regionMap.put(missionId, gps.getRegion());
                 gps.setRegion(MapUtil.gpsParse(lat,lon));
+                regionMap.put(missionId, gps.getRegion());
             } else {
                 // 时间间隔未达到阈值
                 gps.setRegion(regionMap.get(missionId));
@@ -161,12 +161,18 @@ public class ParseMqtt{
         // json解析器，解析json数据
         LogUtil.d(TAG, "mqtt json:"+json);
         JsonParser parser = new JsonParser();
-        JsonElement element = parser.parse(json);
-        if (!element.isJsonObject()) {
+        try {
+            JsonElement element = parser.parse(json);
+            if (!element.isJsonObject()) {
+                return null;
+            } else {
+                return element.getAsJsonObject();
+            }
+        }catch (Exception e) {
+            LogUtil.w(TAG, "mqtt json error");
             return null;
-        } else {
-            return element.getAsJsonObject();
         }
+
     }
 
     private static String parseData(byte[] data, int startIndex, int len) {

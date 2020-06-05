@@ -49,6 +49,11 @@
 #define OLED_LINE3		6
 
 
+void Oled_Show_Line0(const uint8_t* data);
+void Oled_Show_Line1(const uint8_t* data);
+void Oled_Show_Line2(const uint8_t* data);
+void Oled_Show_Line3(const uint8_t* data);
+
 void Oled_WR_Byte(uint8_t data, uint8_t cmd);	    
 void Oled_Display_On(void);
 void Oled_Display_Off(void);	   							   		    

@@ -69,8 +69,8 @@ int main(void)
     Tim2_NVIC();
 	Tim2_Callback_Init();
 	Tim2_Start();
-	// Tim2_Callback_Add(Task_Status);
-	// Key_Init();
+	Tim2_Callback_Add(Task_Status);
+	Key_Init();
 	Oled_Init();
     Led_Init();
 	Task_Status();
@@ -79,7 +79,7 @@ int main(void)
 	Gprs_Init();
 	Gps_Init();
 
-	// Mqtt_Init();
+	Mqtt_Init();
 	// Tim2_Callback_Add(Task_Get_Mission);
 	
 

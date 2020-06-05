@@ -84,7 +84,9 @@ public class MqttManager{
             connOpts.setKeepAliveInterval(180);
             connOpts.setUserName(sign.getUsername());
             connOpts.setPassword(sign.getPassword().toCharArray());
-            mqttClient.setCallback(new MqttCallback(){
+            connOpts.setAutomaticReconnect(true);
+            mqttClient.setCallback(new MqttCallbackExtended() {
+
                 @Override
                 public void connectionLost(Throwable throwable){
                     LogUtil.d(TAG, "connectionLost");
@@ -110,9 +112,43 @@ public class MqttManager{
                 }
 
                 @Override
-                public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken){ }
+                public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken){
+
+                }
+
+                @Override
+                public void connectComplete(boolean b, String s){
+                    if (callMap != null) {
+                        callMap.forEach((k,v)->subscribe(k,null));
+                    }
+
+                    //callMap.put(topic, callback);
+                }
             });
-            mqttClient.connect(connOpts);
+            //mqttClient.setCallback(new MqttCallback(){
+            //    @Override
+            //    public void connectionLost(Throwable throwable){
+            //
+            //    }
+            //
+            //    @Override
+            //    public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception{
+            //
+            //    }
+            //
+            //    @Override
+            //    public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken){ }
+            //});
+            //判断拦截状态，这里注意一下，如果没有这个判断，是非常坑的
+            if (!mqttClient.isConnected()) {
+                mqttClient.connect(connOpts);
+                LogUtil.d(TAG, "连接成功");
+            }else {//这里的逻辑是如果连接成功就重新连接
+                mqttClient.disconnect();
+                mqttClient.connect(connOpts);
+                LogUtil.d(TAG, "连接成功");
+            }
+            //mqttClient.connect(connOpts);
         }
         catch (MqttException e) {
             e.printStackTrace();

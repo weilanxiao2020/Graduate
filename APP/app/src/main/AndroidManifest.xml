@@ -22,13 +22,15 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".module.MainActivity">
+
+        </activity>
+        <activity android:name=".module.user.UserActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".module.user.UserActivity"/>
         <activity android:name=".module.user.UserOrderActivity"/>
         <activity android:name=".module.staff.StaffLoginActivity"/>
         <activity android:name=".module.staff.StaffManagerActivity"/>
